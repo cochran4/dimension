@@ -1,0 +1,27 @@
+{
+  "questions": [
+    {
+      "name": "What is your age in years?",
+      "value": -1,
+      "values": ["11-14", "15-17"]
+    },
+    {
+      "name": "How do you currently describe your gender identity?",
+      "value": -1,
+      "values": ["Female", "Male", "Other"]
+    },
+    {
+      "name": "What is your race?",
+      "value": -1,
+      "values": ["American Indian/Alaska Native", "Asian", "Native Hawaiian or Other Pacific Islander", "Black or African American", "White", "More than One Race", "Unknown", "Other"]
+    },
+    {
+      "name": "What is your ethnicity?",
+      "value": -1,
+      "values": ["Hispanic", "Not Hispanic"]
+    }
+  ],
+  
+  "instructions": "Tell us about yourself." 
+
+}

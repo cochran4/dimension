@@ -1,0 +1,58 @@
+{
+    "questions": [
+      {
+        "name": "Mad",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Joyful",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Sad",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Proud",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Cheerful",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Scared",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Happy",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Afraid",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Lively",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      },
+      {
+        "name": "Miserable",
+        "value": -1,
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+      }
+    ],
+
+    "instructions": "This scale consists of a number of words that describe different feelings and emotions. Read each item and indicate to what extent you have felt this way during the past week." 
+
+}
+  

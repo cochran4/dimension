@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-row id="header">
+      <ion-col size="12">
+        <!-- Display Instructions -->
+        <p style="text-align: center; font-weight: bold; color: #373333;">{{ instructions }}</p>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content style="background-color: #FAF3DD;">
+
+  <!-- Survey Question Cards -->
+  <ion-card *ngFor="let item of items; let i = index" style="border-radius: 10px; margin: 10px;">
+    <ion-card-content>
+      <ion-item lines="none" style="margin-bottom: 10px;">
+        <ion-label style="color: #373333;">{{ item.name }}</ion-label>
+        <ion-select [(ngModel)]="item.value" interface="popover" (ionChange)="changeValue($event, i)">
+          <ion-select-option *ngFor="let value of item.values" [value]="value">{{ value }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Submit Button -->
+  <div class="ion-padding" style="padding-top: 20px;">
+    <ion-button expand="block" type="submit" class="ion-no-margin" (click)="submit()" style="background-color: #91C788; color: white; border-radius: 20px;">
+      Submit
+    </ion-button>
+  </div>
+  
+</ion-content>

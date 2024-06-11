@@ -1,0 +1,26 @@
+.thank-you-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px; /* Add padding around the container */
+  }
+  
+  h2 {
+    font-size: 1.5em;
+    color: var(--ion-color-primary);
+    margin-bottom: 20px;
+  }
+  
+  h3.credit-code {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--ion-color-secondary);
+    padding: 10px;
+    border: 2px dashed var(--ion-color-secondary);
+    border-radius: 5px;
+    margin: 20px auto; // Centers the code block horizontally
+    width: fit-content; // Adjusts the width to fit the content
+  }
+  

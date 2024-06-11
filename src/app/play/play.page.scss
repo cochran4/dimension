@@ -1,0 +1,48 @@
+.state {
+	object-fit: cover;
+}
+
+ion-content{
+ion-img{
+    display: block;
+    margin: 0 auto; // Make the photo center align
+    width: auto;    // Adjust the width according to height
+    height: 90vh;   // Height = 50% of screen
+    overflow: visible;  
+  }
+  ion-label {
+    opacity: 0.75;
+  }
+}
+
+ion-fab-button {
+   width:  84px;
+   height: 84px;
+}
+
+// .fab-horizontal-center {
+//    margin-left: unset;
+//    margin-inline-start: -50px !important;
+// }
+
+// Toggle visiability
+.transition-element {
+  transition: opacity 0.5s ease-in-out; /* Adjust the duration and timing function as needed */
+  opacity: 1; /* Fully visible by default */
+}
+
+// Longer transition
+.long-transition {
+  opacity: 0;
+  transition: opacity 3s ease-in; /* Faster fade-out */
+}
+
+.long-transition.visible {
+  opacity: 1;
+  transition: opacity 0.5s ease-out; /* Slower fade-in */
+}
+
+.hidden {
+  opacity: 0; /* Fully transparent when hidden */
+  pointer-events: none; /* Prevents click events on hidden elements */
+}

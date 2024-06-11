@@ -1,0 +1,7 @@
+{
+  "name": "seqer",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
