@@ -140,5 +140,8 @@ export class DemographyPage implements OnInit {
         },
         error: (error) => console.error('Error submitting all survey data:', error)
       });
+
+    // !!! navigate to play page anyway for now, delete later once data submission is set up
+    this.router.navigate(['/play']);
   }
 }
