@@ -11,6 +11,12 @@ import { Storage } from '@ionic/storage-angular';
 export class HomePage {
 
   // Initialize
+  ageConfirmed: boolean = false;
+  email: string = "";
+  sent: boolean = false;
+  enteredCode: string = "";
+  validCode: boolean = false;
+
   name         = "DELETE_MTURKTEST_022924_" + this.stringGen(6);
   password     = this.stringGen(4);
   study        = "DELETE_MTURKTEST_022924";
@@ -20,27 +26,38 @@ export class HomePage {
               private router: Router, 
               private http: HttpClient) {}
 
-// Things to initialize while loading page
-async ngOnInit() {
-  await this.init(); // Ensure storage is initialized
-}
-
+  // Things to initialize while loading page
+  async ngOnInit() {
+    await this.init(); // Ensure storage is initialized
+  }
 
   async init() {
     // Create the storage instance
     this.storage = await this.storageService.create();
   }
-            
+
+  sendEmail() {
+    /* send password to parent email */
+    console.log(this.password);
+    this.sent = true;
+  }
+
+  validate() {
+    // password is correct
+    if (this.enteredCode == this.password) {
+      this.navigatePlay();
+    }
+
+  }
 
   // Navigate to play page
   navigatePlay() {
-
     // UPDATE !!!! Register user and then navigate
     //this.registerUser();
 
     // UPDATE !!!!
-    this.storage?.set('jwt',"temporary_jwt"); 
-    this.storage?.set('name',this.name);
+    this.storage?.set('jwt', "temporary_jwt"); 
+    this.storage?.set('name', this.name);
     this.router.navigate(['consent']);
 
   }
