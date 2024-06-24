@@ -29,7 +29,7 @@
 
       <ion-item class="ion-text-nowrap">
         <ion-label><strong>Enter code:</strong></ion-label>
-        <ion-input type="text" [(ngModel)]="enteredCode"></ion-input>
+        <ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode"></ion-input>
       </ion-item>
 
       <ion-button (click)="validate()">Continue</ion-button>

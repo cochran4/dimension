@@ -2,6 +2,7 @@ import { Component , OnInit} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
+import { AlertController } from '@ionic/angular';
 
 interface Point {
   x: number;
@@ -22,7 +23,8 @@ export class PlayPage {
 
   constructor(public storageService: Storage, 
               private router: Router, 
-              private http: HttpClient) {}
+              private http: HttpClient,
+              private alertCtrl: AlertController) {}
   //--------------------------------------------------------------------------
   // Life cycle events
   //--------------------------------------------------------------------------
@@ -59,17 +61,34 @@ export class PlayPage {
     });
   }
 
-  // Start timer
   ngAfterViewInit() {
-    this.agent.start_time = performance.now();
+    this.presentAlert();
+  }
+
+  async presentAlert() {
+    const alert = await this.alertCtrl.create({
+      header: "Instructions",
+      message: "Instructions go here.",
+      buttons: [
+        {
+          text: "begin",
+          role: 'confirm',
+          handler: () => {
+            this.agent.start_time = performance.now();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   //--------------------------------------------------------------------------
   // Game parameters
   //--------------------------------------------------------------------------
 
-   // Initialize variables
-   private storage: Storage | null = null;
+  // Initialize variables
+  private storage: Storage | null = null;
   targetPoints   = 0;
   current_reward = 0;
   current_image  = 0;
@@ -126,10 +145,6 @@ export class PlayPage {
                   '/assets/negative/Car accident 4.jpg',
                 ],
                 ];
-
-    
-    
-  
 
   //--------------------------------------------------------------------------
   // Set up game

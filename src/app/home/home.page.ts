@@ -45,7 +45,8 @@ export class HomePage {
   validate() {
     // password is correct
     if (this.enteredCode == this.password) {
-      this.navigatePlay();
+      // this.registerUser();
+      this.router.navigate(['consent']);
     }
 
   }
@@ -78,8 +79,8 @@ export class HomePage {
           // Save username to local storage
           this.storage?.set('name',this.name);
     
-          // Navigate to play page
-          this.router.navigate(['play']);
+          // // Navigate to play page
+          // this.router.navigate(['play']);
     
         });
   }

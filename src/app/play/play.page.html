@@ -17,22 +17,22 @@
 
 <ion-content color="dark" scrollY="false">
   <ion-fab vertical="top" horizontal="center" slot="fixed" style="padding: 20px;" id="instructions" class="transition-element">
-  <ion-label color="light">
-    Click on the triangle to select a point. Your selection of points A, B, C, or any point between, will determine your preference for winning points versus seeing negative images.
-  </ion-label>
+    <ion-label color="light">
+      Click on the triangle to select a point. Your selection of points A, B, C, or any point between, will determine your preference for winning points versus seeing negative images.
+    </ion-label>
   </ion-fab>
 
-<ion-content fullscreen="true" scrollY="false" color="dark">
-  <ion-fab vertical="center" horizontal="center" slot="fixed">
-    <ion-fab-button id="point_bubble" class="long-transition">
-       <ion-label color="light"><h1 style="font-size:32px"> {{"+ " + this.current_reward.toString()}} </h1></ion-label>
-    </ion-fab-button>
-  </ion-fab>
-  <div style="align-items: center; justify-content: center;" id="neg_image" class="transition-element hidden">
-    <ion-img src={{task.images[current_image]}}></ion-img>
-    <!--<img-loader (load)="onImageLoad()" src={{images[agent.image_id]}} useImg width="100vw" height="90vh" display="flex"></img-loader>-->
-  </div>
-</ion-content>
+  <ion-content fullscreen="true" scrollY="false" color="dark">
+    <ion-fab vertical="center" horizontal="center" slot="fixed">
+      <ion-fab-button id="point_bubble" class="long-transition">
+        <ion-label color="light"><h1 style="font-size:32px"> {{"+ " + this.current_reward.toString()}} </h1></ion-label>
+      </ion-fab-button>
+    </ion-fab>
+    <div style="align-items: center; justify-content: center;" id="neg_image" class="transition-element hidden">
+      <ion-img src={{task.images[current_image]}}></ion-img>
+      <!--<img-loader (load)="onImageLoad()" src={{images[agent.image_id]}} useImg width="100vw" height="90vh" display="flex"></img-loader>-->
+    </div>
+  </ion-content>
 
 
   <ion-fab vertical="center" horizontal="center" slot="fixed" id="action_triangle" class="transition-element">
@@ -169,4 +169,5 @@
       </g>
     </svg>
   </ion-fab>
+
 </ion-content>
