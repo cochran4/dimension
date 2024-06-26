@@ -64,25 +64,29 @@ export class HomePage {
   }
 
   registerUser(){
-        // Register user
-        this.http.post('https://lorevimo.com/seqer/register.php',{
-          "name":     this.name,
-          "password": this.password,
-          "consent":  "na",
-          "study":    this.study,
-        },{responseType: 'text'}).subscribe( 
-        response => {
-          console.log('success!!')
-          // Save token
-          this.storage?.set('jwt',JSON.parse(response).jwt);
-          
-          // Save username to local storage
-          this.storage?.set('name',this.name);
-    
-          // // Navigate to play page
-          // this.router.navigate(['play']);
-    
-        });
+
+    // temp code until backend is connected; random jwt value
+    this.storage?.set('jwt', `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxMjEyNSwiaWF0IjoxNzE5NDEyMTI1fQ.Ab6Ehz0yMboUwMysB2h0wT_DKd9xwlWUrTfyViKwnIo`)
+
+    // // Register user
+    // this.http.post('https://lorevimo.com/seqer/register.php',{
+    //   "name":     this.name,
+    //   "password": this.password,
+    //   "consent":  "na",
+    //   "study":    this.study,
+    // }, {responseType: 'text'}).subscribe( 
+    // response => {
+    //   console.log('success!!')
+    //   // Save token
+    //   this.storage?.set('jwt', JSON.parse(response).jwt);
+      
+    //   // Save username to local storage
+    //   this.storage?.set('name', this.name);
+
+    //   // // Navigate to play page
+    //   // this.router.navigate(['play']);
+
+    // });
   }
 
   //--------------------------------------------

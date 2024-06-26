@@ -344,6 +344,7 @@ export class PlayPage {
         console.log('Data sent successfully', response);
 
         // Navigate to thank you page
+        this.storageService.set("finished", "true");
         this.router.navigate(['thank-you']);
 
       },
