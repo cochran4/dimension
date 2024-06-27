@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { ConsentGuard } from './guards/consent.guard';
 import { FinishGuard } from './guards/finish.guard';
+import { HomePageModule } from './home/home.module';
 
 const routes: Routes = [
   {
@@ -9,13 +10,14 @@ const routes: Routes = [
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   },
   {
-    path: 'consent',
-    loadChildren: () => import('./consent/consent.module').then( m => m.ConsentPageModule)
-  },
-  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full'
+  },
+  {
+    path: 'consent',
+    loadChildren: () => import('./consent/consent.module').then( m => m.ConsentPageModule),
+    canActivate: [ConsentGuard]
   },
   {
     path: 'demography',
@@ -32,6 +34,10 @@ const routes: Routes = [
     loadChildren: () => import('./thank-you/thank-you.module').then( m => m.ThankYouPageModule),
     canActivate: [ConsentGuard, FinishGuard]
   },
+  {
+    path: "**",
+    redirectTo: '/home'
+  }
 ];
 
 @NgModule({

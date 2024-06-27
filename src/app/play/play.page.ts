@@ -75,6 +75,7 @@ export class PlayPage {
           role: 'confirm',
           handler: () => {
             this.agent.start_time = performance.now();
+            console.log("timer started at ", this.agent.start_time);
           }
         }
       ]

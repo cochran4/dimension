@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
+import { AuthenticationService } from '../services/authentication.service';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,8 @@ export class HomePage {
 
   constructor(public storageService: Storage, 
               private router: Router, 
-              private http: HttpClient) {}
+              private http: HttpClient,
+              private authService: AuthenticationService) {}
 
   // Things to initialize while loading page
   async ngOnInit() {
@@ -45,8 +47,8 @@ export class HomePage {
   validate() {
     // password is correct
     if (this.enteredCode == this.password) {
-      // this.registerUser();
-      this.router.navigate(['consent']);
+      this.registerUser();
+      //this.router.navigate(['consent']);
     }
 
   }
@@ -65,8 +67,17 @@ export class HomePage {
 
   registerUser(){
 
+    this.authService.login({
+      name: this.name,
+      password: this.password,
+      consent: "na",
+      study: this.study
+    });
+
+    this.router.navigate(['/consent']);
+
     // temp code until backend is connected; random jwt value
-    this.storage?.set('jwt', `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxMjEyNSwiaWF0IjoxNzE5NDEyMTI1fQ.Ab6Ehz0yMboUwMysB2h0wT_DKd9xwlWUrTfyViKwnIo`)
+    // this.storage?.set('jwt', `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxMjEyNSwiaWF0IjoxNzE5NDEyMTI1fQ.Ab6Ehz0yMboUwMysB2h0wT_DKd9xwlWUrTfyViKwnIo`)
 
     // // Register user
     // this.http.post('https://lorevimo.com/seqer/register.php',{
