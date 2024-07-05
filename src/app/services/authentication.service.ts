@@ -43,7 +43,7 @@ export class AuthenticationService {
 
     // temp code until backend is setup
     this.storage.set("name", "some_name");
-    this.storage.set("gift_url", "gifturl.com");
+    this.storage.set("gift_url", "https://www.google.com");
     this.storage.set("study", "study_name");
     this.storage.set("jwt", `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxNzgzMSwiaWF0IjoxNzE5NDE3ODMxfQ.OBTzujidFAU8qOY2HQMv_OnvePDFLCoxp6uqJgmseoM`)
     this.isAuthenticated.next(true);

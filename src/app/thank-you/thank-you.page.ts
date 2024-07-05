@@ -10,13 +10,13 @@ export class ThankYouPage implements OnInit {
 
   // Initialize variables
   private storage: Storage | null = null;
-  name = "";
+  gift_url = "";
 
   constructor(public storageService: Storage) {}
 
   async ngOnInit() {
     await this.init(); // Ensure storage is initialized
-    this.loadName(); // Then load the name
+    this.getGift(); // Then load the name
   }
 
   async init() {
@@ -24,11 +24,11 @@ export class ThankYouPage implements OnInit {
     this.storage = await this.storageService.create();
   }
 
-  loadName() {
-    this.storage?.get('name').then((val: string | null) => {
+  getGift() {
+    this.storage?.get('gift_url').then((val: string | null) => {
       if (val) {
         // Name value is available
-        this.name = val;
+        this.gift_url = val;
       }
     });
   }
