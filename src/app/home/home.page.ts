@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { AuthenticationService } from '../services/authentication.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -18,15 +19,15 @@ export class HomePage {
   enteredCode: string = "";
   validCode: boolean = false;
 
-  name         = "DELETE_MTURKTEST_022924_" + this.stringGen(6);
-  password     = this.stringGen(4);
+  name         = this.stringGen(4);
   study        = "DELETE_MTURKTEST_022924";
   private storage: Storage | null = null;
 
   constructor(public storageService: Storage, 
               private router: Router, 
               private http: HttpClient,
-              private authService: AuthenticationService) {}
+              private authService: AuthenticationService,
+              private alertCtrl: AlertController) {}
 
   // Things to initialize while loading page
   async ngOnInit() {
@@ -36,45 +37,38 @@ export class HomePage {
   async init() {
     // Create the storage instance
     this.storage = await this.storageService.create();
+    await this.registerUser();
   }
 
   sendEmail() {
     /* send password to parent email */
-    console.log(this.password);
+    console.log(this.name);
     this.sent = true;
   }
 
-  validate() {
+  async validate() {
     // password is correct
-    if (this.enteredCode == this.password) {
-      this.registerUser();
-      //this.router.navigate(['consent']);
+    if (this.enteredCode == this.name) {
+      console.log(await this.storage?.get("token"));
+      console.log(await this.storage?.get("gift_url"));
+
+      const jwt = await this.storage?.get("token");
+      this.router.navigate(['/consent']);
     }
 
   }
 
-  // Navigate to play page
-  navigatePlay() {
-    // UPDATE !!!! Register user and then navigate
-    //this.registerUser();
-
-    // UPDATE !!!!
-    this.storage?.set('jwt', "temporary_jwt"); 
-    this.storage?.set('name', this.name);
-    this.router.navigate(['consent']);
-
-  }
-
-  registerUser(){
-
-    this.authService.login({
-      name: this.name,
-      password: this.password,
-      consent: "na",
-      study: this.study
-    });
-
-    this.router.navigate(['/consent']);
+  async registerUser(){
+    this.authService.login({name: this.name, study: this.study}).subscribe(async response => {
+      if (!response) {
+        const alert = await this.alertCtrl.create({
+          header: "No more space :(",
+          message: "Sorry, we've run out of space in our study. Please try again later.",
+          backdropDismiss: false
+        });
+        await alert.present();
+      }
+    }) 
 
     // temp code until backend is connected; random jwt value
     // this.storage?.set('jwt', `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxMjEyNSwiaWF0IjoxNzE5NDEyMTI1fQ.Ab6Ehz0yMboUwMysB2h0wT_DKd9xwlWUrTfyViKwnIo`)

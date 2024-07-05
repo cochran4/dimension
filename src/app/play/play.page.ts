@@ -62,13 +62,14 @@ export class PlayPage {
   }
 
   ngAfterViewInit() {
-    this.presentAlert();
+    this.presentAlert("Instructions go here");
   }
 
-  async presentAlert() {
+  async presentAlert(instruction_text: string) {
     const alert = await this.alertCtrl.create({
       header: "Instructions",
-      message: "Instructions go here.",
+      message: instruction_text,
+      backdropDismiss: false,
       buttons: [
         {
           text: "begin",
@@ -90,6 +91,7 @@ export class PlayPage {
 
   // Initialize variables
   private storage: Storage | null = null;
+  block = 1;
   targetPoints   = 0;
   current_reward = 0;
   current_image  = 0;
@@ -329,15 +331,14 @@ export class PlayPage {
     this.http.post('https://lorevimo.com/seqer/game.php', {
       
       // Data to be sent to http
-      "jwt":   this.jwt,
-      "token": "K7tKmqMM4Pse:1pmNQuF3r/xpK$C6$",
-      "name":  this.name,
-      "level": "na",
-      "stage": "na",
-      "mdp":   JSON.stringify(this.task),
-      "agent": JSON.stringify(this.agent),
-      "completed": "na",
-        
+      jwt : this.jwt,
+      name:  this.name,
+      table: "game",
+      block: this.block,
+      mdp:   JSON.stringify(this.task),
+      agent: JSON.stringify(this.agent),
+      completed: "na",
+
     }, {responseType: 'text'})
     .subscribe({
       next: (response) => {

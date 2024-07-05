@@ -36,26 +36,38 @@ export class AuthenticationService {
     }
   }
 
-  async login(info: {
+  login(info: {
     name: string,
-    password: string,
-    consent: string,
     study: string
-  }) {
+  }): Observable<boolean> {
 
     // temp code until backend is setup
+    this.storage.set("name", "some_name");
+    this.storage.set("gift_url", "gifturl.com");
+    this.storage.set("study", "study_name");
     this.storage.set("jwt", `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxNzgzMSwiaWF0IjoxNzE5NDE3ODMxfQ.OBTzujidFAU8qOY2HQMv_OnvePDFLCoxp6uqJgmseoM`)
     this.isAuthenticated.next(true);
-    const token = await this.storage.get("jwt");
-    console.log("token set: ", token);
+    return of(true);
 
     // return this.http.post("backendserver.com", info).pipe(
-    //   map((data: any) => data.token), 
-    //   switchMap((token) => {
-    //     return from(this.storage.set("token", token));
+    //   map((data: any) => (data.token, data.gift_url)), 
+    //   switchMap((token, gift_url) => {
+    //     if (gift_url) {
+    //      this.storage.set("name", info.name);
+    //      this.storage.set("study", info.study);
+    //      this.storage.set("token", token);
+    //      this.storage.set("gift_url", gift_url)
+    //       return of(true);
+    //     } else {
+    //       return of(false);
+    //     }
     //   }),
-    //   tap((_) => {
-    //     this.isAuthenticated.next(true);
+    //   tap((res) => {
+    //     if (res) {
+    //       this.isAuthenticated.next(true);
+    //     } else {
+    //       this.isAuthenticated.next(false);
+    //     }
     //   })
     // )
   }
