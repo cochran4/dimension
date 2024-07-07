@@ -1,8 +1,12 @@
-import { Component , OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
+import { AlertController } from '@ionic/angular';
+import * as yaml from 'js-yaml';
 
+// Interfaces
+import { BlockTemplate } from './block.interface';
 interface Point {
   x: number;
   y: number;
@@ -22,143 +26,92 @@ export class PlayPage {
 
   constructor(public storageService: Storage, 
               private router: Router, 
-              private http: HttpClient) {}
+              private http: HttpClient,
+              private alertCtrl: AlertController) {}
   //--------------------------------------------------------------------------
   // Life cycle events
   //--------------------------------------------------------------------------
 
-  async init() {
-    // Create the storage instance
-    this.storage = await this.storageService.create();
-  }
-
-
-  // Things to initialize while loading page
   async ngOnInit() {
 
+    // Load data
+    await this.initStorage();
+    this.loadJWT();
+    this.loadUserName();
+    this.loadBlockTemplate(this.current_block); // Load the first block template
+  
+    // Initialize colors
+    this.primaryColor = this.convertToRgba(getComputedStyle(document.documentElement).getPropertyValue('--ion-color-primary'), 0.4);
+    this.primaryShadeColor = this.convertToRgba(getComputedStyle(document.documentElement).getPropertyValue('--ion-color-primary-shade'), 0.4);
+  
 
-    await this.init(); // Ensure storage is initialized
+    // Update choice in negative image
+    this.updateImageRandomly()
 
-    // Randomly shuffle rewards
-    this.task.reward_success = this.shuffleArray(this.task.reward_success); 
-
-    // Get current jwt from storage
-    this.storage?.get('jwt').then((val: string | null) => {
-      if (val){
-        // jwt is available
-        this.jwt = val;
-      }
-    });
-
-    // Get user name from storage
-    this.storage?.get('name').then((val: string | null) => {
-      if (val){
-        // name is available
-        this.name = val;
-      }
-    });
   }
-
-  // Start timer
-  ngAfterViewInit() {
-    this.agent.start_time = performance.now();
-  }
+  
 
   //--------------------------------------------------------------------------
-  // Game parameters
+  // Initialize variables
   //--------------------------------------------------------------------------
 
-   // Initialize variables
-   private storage: Storage | null = null;
-  targetPoints   = 0;
-  current_reward = 0;
-  current_image  = 0;
+  // Data storage
+  private storage: Storage | null = null;
   name           = "";
   jwt            = "";
 
-  // Images
-  imageUrls = [[
-                '/assets/shapes/shape1.jpg',
-                '/assets/shapes/shape2.jpg',
-                '/assets/shapes/shape3.jpg',
-                '/assets/shapes/shape4.jpg',
-                '/assets/shapes/shape5.jpg',
-                '/assets/shapes/shape6.jpg',
-                '/assets/shapes/shape7.jpg',
-                ],
-                [
-                '/assets/textures/state0.jpg',
-                '/assets/textures/state1.jpg',
-                '/assets/textures/state2.jpg',
-                '/assets/textures/state3.jpg',
-                '/assets/textures/state4.jpg',
-                '/assets/textures/state5.jpg',
-                '/assets/textures/state6.jpg',
-                '/assets/textures/state7.jpg',
-                ],                 
-                [
-                '/assets/light/light1.jpg',
-                '/assets/light/light2.jpg',
-                '/assets/light/light3.jpg',
-                '/assets/light/light4.jpg',
-                '/assets/light/light5.jpg',
-                '/assets/light/light6.jpg',
-                '/assets/light/light7.jpg',
-                '/assets/light/light8.jpg',
-                '/assets/light/light9.jpg',
-                ], 
-                [
-                '/assets/dark/dark1.jpg',
-                '/assets/dark/dark2.jpg',
-                '/assets/dark/dark3.jpg',
-                '/assets/dark/dark4.jpg',
-                '/assets/dark/dark5.jpg',
-                '/assets/dark/dark6.jpg',
-                '/assets/dark/dark7.jpg',
-                '/assets/dark/dark8.jpg',
-                '/assets/dark/dark9.jpg',
-                '/assets/dark/dark10.jpg',
-                ], 
-                [
-                  '/assets/negative/Car accident 1.jpg',
-                  '/assets/negative/Car accident 2.jpg',
-                  '/assets/negative/Car accident 3.jpg',
-                  '/assets/negative/Car accident 4.jpg',
-                ],
-                ];
-
-    
-    
+  // Colors for visualization
+  primaryColor = "";
+  primaryShadeColor = "";
   
-
-  //--------------------------------------------------------------------------
-  // Set up game
-  //--------------------------------------------------------------------------
-
-  // Generate task
-  task = {
-      reward_success    : [0.1, 0.7, 0.9],    // Success probability for Binomial random variable
-      reward_max        : 10,                 // Reward max (Parameter n in binomial distribution)
-      n_trials          : 20,                 // Number of trials
-      images            : this.imageUrls[4],  // Negative images for outcome
+  // Game template
+  game = {
+    number_actions: 3,
+    number_states: 1,
+    number_trials: 1,
+    state_transition: (current_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
+    reward_transition: (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
+    image_transition: (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
+    background_images: [] as string[],
+    negative_images: [] as string[],
+    additional_params: {} as { [key: string]: any },
+    instructions: [] as string[],
+    shuffle_states: [] as number[],
+    shuffle_actions: [] as number[],
   }
   
-  // Initialize agent
+  // Current state of agent
+  pts = 0;
+  image_id = 0;
+  start_time = 0;
+  end_time = 0;
+  choices_left = 40;
+  current_state = 0;
+  next_state = 0;
+  current_reward = 0;
+  current_image = 0;
+  current_image_dummy = 0;
+  targetPoints = 0;
+
+
+  // Agent information for storage
   agent  = {
-      pts            : 0,
-      image_id       : 0,
-      start_time     : 0,
-      end_time       : 0,
-      choices_left   : this.task.n_trials,
-      rewards        : new Array(),
-      images         : new Array(),
-      threats        : new Array(),
-      actions        : new Array(),
-      reaction_times : new Array(),
+    rewards        : new Array(),
+    images         : new Array(),
+    threats        : new Array(),
+    actions        : new Array(),
+    reaction_times : new Array(),
+    states         : [1],
   };
 
+  // Between block information
+  total_blocks: number = 2; // UPDATE TO 8!!!
+  current_block  = 1;
+
+  
+  
   //--------------------------------------------------------------------------
-  // Functionality
+  // Dynamic functions
   //--------------------------------------------------------------------------
 
   onSvgClick(event: MouseEvent): void {
@@ -211,44 +164,45 @@ export class PlayPage {
   executeAction(svgPoint: Point, A: Point, B: Point, C: Point): void {
 
      // Stop clock and store reaction time
-     this.agent.end_time = performance.now();
-     this.agent.reaction_times.push(this.agent.end_time-this.agent.start_time);
+     this.end_time = performance.now();
+     this.agent.reaction_times.push(parseFloat((this.end_time - this.start_time).toFixed(3)));
      
-     // Determine barycentric coordinates
-     const lambda = this.barycentricCoordinates(svgPoint, A, B, C);
+    // Generate barycentric coordinates
+    var lambda: [number, number, number] = this.barycentricCoordinates(svgPoint, A, B, C);
+
+    // Use the shuffled states, ensuring the result is still a tuple of length 3
+    lambda = [
+      parseFloat(lambda[this.game.shuffle_actions[0]].toFixed(3)),
+      parseFloat(lambda[this.game.shuffle_actions[1]].toFixed(3)),
+      parseFloat(lambda[this.game.shuffle_actions[2]].toFixed(3))
+    ];
 
      // Store action
      this.agent.actions.push(lambda);
 
-     // Determine success probability
-     const reward_success = this.task.reward_success[0]*lambda[0] + 
-                            this.task.reward_success[1]*lambda[1] + 
-                            this.task.reward_success[2]*lambda[2];
-
-    // Determine image probability
-    const image_success =   this.task.reward_success[0]*lambda[0] + 
-                            this.task.reward_success[1]*lambda[1] + 
-                            this.task.reward_success[2]*lambda[2];
-    const probabilities = new Array(this.task.images.length+1).fill(image_success/this.task.images.length); 
-    probabilities[0]    = 1-image_success;
+     // Determine the next state using the state transition function
+     this.next_state = this.game.state_transition(this.current_state, lambda, this.game.additional_params);
 
      // Generate reward, push to array
-     this.current_reward = this.binomialRandomVariable(this.task.reward_max, reward_success);
+     this.current_reward = this.game.reward_transition(this.current_state, this.next_state, lambda, this.game.additional_params);
      this.agent.rewards.push(this.current_reward);
 
      // Generate image, push to array
-     const current_image_id = this.generateCategoricalRandomVariable(probabilities);
-     this.agent.images.push(current_image_id);
+     this.current_image = this.game.image_transition(this.current_state, this.next_state, lambda, this.game.additional_params);
+     this.agent.images.push(this.current_image);
+
+     // Store state and update state
+     this.agent.states.push(this.next_state);
+     this.current_state = this.next_state;
      
      // Hide the SVG and the instructions
      document.getElementById('action_triangle')?.classList.add('hidden');
      document.getElementById('instructions')?.classList.add('hidden');
 
      // Reveal image if image is success
-     if (current_image_id) {
-      this.current_image = current_image_id-1;
+     if (this.current_image) {
       document.getElementById('neg_image')?.classList.remove('hidden');      
-     }
+    }
 
      // Reveal point bubble
      document.getElementById('point_bubble')?.classList.add('visible');
@@ -263,17 +217,17 @@ export class PlayPage {
        setTimeout(() => {
 
         // Update and animate point total
-        this.targetPoints = this.agent.pts + this.current_reward;
+        this.targetPoints = this.pts + this.current_reward;
         this.animatePointIncrement();
 
         // Decrement choices left
-        this.agent.choices_left--;
+        this.choices_left--;
 
         // Start clock again
-        this.agent.start_time = performance.now();
+        this.start_time = performance.now();
 
         // Check if there are any choices left
-        if (this.agent.choices_left){
+        if (this.choices_left){
 
           // Hide outcome
           document.getElementById('neg_image')?.classList.add('hidden');
@@ -285,15 +239,19 @@ export class PlayPage {
           // Remove the "X" text element
           document.querySelectorAll('.selected-point').forEach(el => el.remove());
 
+          // Update choice in negative image
+          this.updateImageRandomly()
+
         } else {
 
+          // Hide outcome
+          document.getElementById('neg_image')?.classList.add('hidden');
 
-          // UPDATE!!! Navigate to thank you page
-          this.router.navigate(['thank-you']);
+          // Update choice in negative image
+          this.updateImageRandomly()
 
-
-          // UPDATE!!!! Send data to lorevimo.com
-          // this.sendData()
+          // Load next block
+          this.loadNextBlock();
 
         }
       }, 3000); 
@@ -301,44 +259,206 @@ export class PlayPage {
     }, 2000); 
 
   }
+  //--------------------------------------------------------------------------
+  // Loading files
+  //--------------------------------------------------------------------------
 
+  // Load storage service
+  private async initStorage() {
+    this.storage = await this.storageService.create();
+  }
+
+  // Load JWT
+  private loadJWT() {
+    this.storage?.get('jwt').then((val: string | null) => {
+      if (val) {
+        this.jwt = val;
+      }
+    });
+  }
+
+  // Load user name
+  private loadUserName() {
+    this.storage?.get('name').then((val: string | null) => {
+      if (val) {
+        this.name = val;
+      }
+    });
+  }
+
+  // Load and parse the YAML file
+  private loadBlockTemplate(blockNumber: number) {
+    this.http.get(`/assets/block${blockNumber}.yaml`, { responseType: 'text' }).subscribe(yamlText => {
+      // Block template
+      const template = yaml.load(yamlText) as unknown as BlockTemplate;
+
+      // Store block template in "game"
+      this.game.number_actions = template.number_actions;
+      this.game.number_states = template.number_states;
+      this.game.number_trials = template.number_trials;
+      this.game.additional_params = template.additional_params;
+      this.game.state_transition  = new Function('current_state', 'action', 'params', `return (${template.state_transition})(current_state, action, params);`) as (current_state: number, action: [number, number, number], params: { [key: string]: any }) => number;
+      this.game.reward_transition = new Function('current_state', 'next_state', 'action', 'params', `return (${template.reward_transition})(current_state, next_state, action, params);`) as (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => number;
+      this.game.image_transition  = new Function('current_state', 'next_state', 'action', 'params', `return (${template.image_transition})(current_state, next_state, action, params);`) as (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => number;
+      this.game.negative_images   = template.negative_images;
+      this.game.background_images = template.background_images;
+      this.game.instructions = template.instructions;
+      this.game.shuffle_states  = this.shuffleArray(Array.from({ length: template.number_states }, (_, i) => i)); // Random shuffle
+      this.game.shuffle_actions = this.shuffleArray(Array.from({ length: template.number_actions }, (_, i) => i)); // Random shuffle
+
+      // Set choices left to number of trials
+      this.choices_left = template.number_trials;
+
+      // Load instructions
+      this.loadInstructions();
+
+    });
+
+  }
+
+  // Load instructions for given block
+  async loadInstructions() {
+    let currentInstructionIndex = 0;
+  
+    const showNextInstruction = async () => {
+      if (currentInstructionIndex >= this.game.instructions.length) {
+        // Show the final alert with the "Begin" button
+        const finalAlert = await this.alertCtrl.create({
+          cssClass: 'custom-alert',
+          message: "Ready to begin?",
+          buttons: [
+            {
+              text: "Begin",
+              role: 'confirm',
+              handler: () => {
+                this.start_time = performance.now();
+                console.log("Timer started at ", this.start_time);
+              }
+            }
+          ]
+        });
+  
+        await finalAlert.present();
+        return;
+      }
+  
+      // Show the current instruction
+      const alert = await this.alertCtrl.create({
+        cssClass: 'custom-alert',
+        message: this.game.instructions[currentInstructionIndex],
+        backdropDismiss: false,
+      });
+  
+      await alert.present();
+  
+      // Dismiss the alert and show the next instruction after 3 seconds
+      setTimeout(async () => {
+        await alert.dismiss();
+        currentInstructionIndex++;
+        await showNextInstruction();
+      }, 5000); // Transition time in milliseconds (5 seconds)
+    };
+  
+    await showNextInstruction();  
+  }
+
+  // Load and parse the YAML file
+  loadNextBlock() {
+
+    // Send data
+    this.sendData();
+
+    // Increment the block index
+    this.current_block++;
+  
+    if (this.current_block <= this.total_blocks) {
+
+      // Reveal triangle and instructions again
+      document.getElementById('action_triangle')?.classList.remove('hidden');
+      document.getElementById('instructions')?.classList.remove('hidden');
+
+      // Remove the "X" text element
+      document.querySelectorAll('.selected-point').forEach(el => el.remove());
+
+      // Update choice in negative image
+      this.updateImageRandomly()
+      
+      // Reset current state
+      this.pts = 0;
+      this.image_id = 0;
+      this.start_time = 0;
+      this.end_time = 0;
+      this.choices_left = 40;
+      this.current_state = 0;
+      this.next_state = 0;
+      this.current_reward = 0;
+      this.current_image = 0;
+      this.current_image_dummy = 0;
+      this.targetPoints = 0;
+
+
+      // Reset agent information
+      this.agent  = {
+        rewards        : new Array(),
+        images         : new Array(),
+        threats        : new Array(),
+        actions        : new Array(),
+        reaction_times : new Array(),
+        states         : [1],
+      };
+
+      // Load the block template
+      this.loadBlockTemplate(this.current_block);
+  
+    } else {
+      // All blocks completed
+      this.router.navigate(['demography']);
+    }
+
+  }
+  
 
   //--------------------------------------------------------------------------
   // Helper functions
   //--------------------------------------------------------------------------
 
-  // Send data to 
-  private sendData(): void {
 
-    this.http.post('https://lorevimo.com/seqer/game.php', {
-      
-      // Data to be sent to http
-      "jwt":   this.jwt,
-      "token": "K7tKmqMM4Pse:1pmNQuF3r/xpK$C6$",
-      "name":  this.name,
-      "level": "na",
-      "stage": "na",
-      "mdp":   JSON.stringify(this.task),
-      "agent": JSON.stringify(this.agent),
-      "completed": "na",
-        
-    }, {responseType: 'text'})
-    .subscribe({
-      next: (response) => {
-        
-        console.log('Data sent successfully', response);
-
-        // Navigate to thank you page
-        this.router.navigate(['thank-you']);
-
-      },
-      error: (error) => {
-        console.error('Error sending data', error);
-      },
-      complete: () => console.log('Request completed')
-    });
-
+  // Update image randomly
+  updateImageRandomly() {
+    const randomIndex = Math.floor(Math.random() * this.game.negative_images.length);
+    this.current_image_dummy = randomIndex;
   }
+
+
+  testing_jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcxOTY3NjkzMiwiZXhwIjoxNzIxNDkxMzMyLCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlciIsInN0dWR5IjoiVGVzdFN0dWR5IiwiZ2lmdF91cmwiOiJodHRwczpcL1wvZXhhbXBsZS5jb21cL2dpZnQ0In19.MpWwDYabhH_U-za5_hV17RUmi6UTMQFNqot1jZJQ6IM";
+
+  private sendData(): void {
+    // Prepare data to send
+    const data = {
+      block: this.current_block,
+      game: JSON.stringify(this.game),
+      agent: JSON.stringify(this.agent),
+    };
+  
+    const postData = {
+      jwt: this.testing_jwt, // UPDATE TO this.jwt!!!!
+      name: this.name,
+      table_name: "games",
+      data: data,
+    };
+  
+    this.http.post('https://lorevimo.com/dimension/survey.php', postData, { responseType: 'text' })
+      .subscribe({
+        next: (response) => {
+          console.log('Data sent successfully', response);
+        },
+        error: (error) => {
+          console.error('Error sending data', error);
+        },
+        complete: () => console.log('Request completed')
+      });
+  }
+  
 
   // Helper function to calculate the sign of an area defined by three points
   private sign(p1: Point, p2: Point, p3: Point): number {
@@ -383,874 +503,23 @@ private shuffleArray<T>(array: T[]): T[] {
   return array;
 }
 
-// Randomly sample from binomial distribution with parameters n and p
-private binomialRandomVariable(n: number, p: number): number {
-    let successes = 0;
-    for (let i = 0; i < n; i++) {
-        if (Math.random() < p) { // Simulate a Bernoulli trial with success probability p
-            successes += 1;
-        }
-    }
-    return successes;
-}
-
 // Animates the point increment
 private animatePointIncrement() {
-  if (this.agent.pts < this.targetPoints) {
+  if (this.pts < this.targetPoints) {
     // Increment points one by one
-    this.agent.pts++;
+    this.pts++;
     // Use requestAnimationFrame for smooth animation
     requestAnimationFrame(() => this.animatePointIncrement());
   }
 }
 
-// Randomly samples from a categorical distribution
-private generateCategoricalRandomVariable(probabilities: number[]): number {
-  const randomValue = Math.random(); // Generate a random value between 0 and 1
-  let sum = 0;
-  let category = 0;
-
-  for (let i = 0; i < probabilities.length; i++) {
-      sum += probabilities[i];
-      if (randomValue <= sum) {
-          category = i;
-          break;
-      }
-  }
-
-  return category; // The index of the chosen category
-
-
+// Covert colors to rgb
+convertToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 }
 
-//@Component({
-//  selector: 'app-play',
-//  templateUrl: './play.page.html',
-//  styleUrls: ['./play.page.scss'],
-//})
-//export class PlayPage implements OnInit {
-
-//   //--------------------------------------------------------------------------
-//   // Game parameters
-//   //--------------------------------------------------------------------------
-
-//   // Initial set up of game 
-//   random    = new Random();
-//   maxSwipes = 20;
-//   timeMax   = 180;
-//   level     = 1;
-//   stage     = 1;
-//   total     = 0;   // Total points for game
-//   completed = 0;
-//   maxStages = 8;
-//   jwt       = "";
-//   name      = "";
-//   sign      = "+";
-//   currentR  = 0;
-//   study     = "";
-//   session   = 1;
-//   progress  = [-1,0,0,1,1,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8];
-//   imagePauseDur = 1;  // Pause to allow for reload
-//   pointCountDur0 = 120; //60;
-//   pointCountDur  = this.pointCountDur0; // Pause
-//   best   = { level : "1.1",
-//              score : 0,
-//              grow  :  ["0","0","0","0","0","0","0","0","0"],
-//              animate: -1,
-//              levels: ["1.1"]};
-//   blockDate = new Date();
-
-//   // Images
-//   imageUrls = [[
-//                 '/assets/shapes/shape1.jpg',
-//                 '/assets/shapes/shape2.jpg',
-//                 '/assets/shapes/shape3.jpg',
-//                 '/assets/shapes/shape4.jpg',
-//                 '/assets/shapes/shape5.jpg',
-//                 '/assets/shapes/shape6.jpg',
-//                 '/assets/shapes/shape7.jpg',
-//                 ],
-//                 [
-//                 '/assets/textures/state0.jpg',
-//                 '/assets/textures/state1.jpg',
-//                 '/assets/textures/state2.jpg',
-//                 '/assets/textures/state3.jpg',
-//                 '/assets/textures/state4.jpg',
-//                 '/assets/textures/state5.jpg',
-//                 '/assets/textures/state6.jpg',
-//                 '/assets/textures/state7.jpg',
-//                 ],                 
-//                 [
-//                 '/assets/light/light1.jpg',
-//                 '/assets/light/light2.jpg',
-//                 '/assets/light/light3.jpg',
-//                 '/assets/light/light4.jpg',
-//                 '/assets/light/light5.jpg',
-//                 '/assets/light/light6.jpg',
-//                 '/assets/light/light7.jpg',
-//                 '/assets/light/light8.jpg',
-//                 '/assets/light/light9.jpg',
-//                 ], 
-//                 [
-//                 '/assets/dark/dark1.jpg',
-//                 '/assets/dark/dark2.jpg',
-//                 '/assets/dark/dark3.jpg',
-//                 '/assets/dark/dark4.jpg',
-//                 '/assets/dark/dark5.jpg',
-//                 '/assets/dark/dark6.jpg',
-//                 '/assets/dark/dark7.jpg',
-//                 '/assets/dark/dark8.jpg',
-//                 '/assets/dark/dark9.jpg',
-//                 '/assets/dark/dark10.jpg',
-//                 ], 
-//                 ];
-
-//    // Motifs for UIC study
-//    motifP1_3state =  [  [ [0,1,0],       [1,0,0],        [0,1,0]     ],  [ [0,0,1],      [0,0,1],        [0,1,0]     ]  ];
-//    motifP2_3state =  [  [ [0,1,0],       [0,0,1],        [1,0,0]     ],  [ [0,0,1],      [1,0,0],        [0,1,0]     ]  ];
-//    motifP3_3state =  [  [ [0,0.8,0.2],   [0.8,0,0.2],    [0.2,0.8,0] ],  [ [0,0.2,0.8],  [0.2,0,0.8],    [0.2,0.8,0] ]  ];
-//    motifP4_3state =  [  [ [0,0.8,0.2],   [0.2,0,0.8],    [0.8,0.2,0] ],  [ [0,0.2,0.8],  [0.8,0,0.2],    [0.2,0.8,0] ]  ];
-//    motifR1_3state =  [0.8, 0.2, 0.2];
-//    motifR2_3state =  [0.666, 0.167, 0.167];
-//    motifP1_4state =  [  [ [0,1,0,0], [1,0,0,0], [0,1,0,0],[0,0,1,0] ], [ [0,0,0,1], [0,0,1,0], [0,1,0,0],[0,0,1,0] ]  ];
-//    motifP2_4state =  [  [ [0,1,0,0], [0,0,1,0], [0,0,0,1],[1,0,0,0] ], [ [0,0,0,1], [1,0,0,0], [0,1,0,0],[0,0,1,0] ]  ];
-//    motifP3_4state =  [  [ [0,0.8,0.1,0.1], [0.8,0,0.1,0.1], [0.1,0.8,0,0.1],[0.1,0.1,0.8,0] ], [ [0,0.1,0.1,0.8], [0.1,0,0.8,0.1], [0.1,0.8,0,0.1],[0.1,0.1,0.8,0] ]  ];
-//    motifP4_4state =  [  [ [0,0.8,0.1,0.1], [0.1,0,0.8,0.1], [0.1,0.1,0,0.8],[0.8,0.1,0.1,0] ], [ [0,0.1,0.1,0.8], [0.8,0,0.1,0.1], [0.1,0.8,0,0.1],[0.1,0.1,0.8,0] ]  ];
-//    motifR1_4state = [0.727,0.091,0.091,0.091];
-//    motifR2_4state = [0.571,0.143,0.143,0.143]; 
-//    motifs = [ [ [ { P :     this.motifP1_3state, 
-//                     R :     this.motifR1_3state,
-//                     norm :  0.256 },  // type 3b
-//                 {   P :     this.motifP2_3state, 
-//                     R :     this.motifR1_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 1
-//              [ {    P :     this.motifP1_3state, 
-//                     R :     this.motifR1_3state,
-//                     norm :  0.256 },  // type 3b
-//                {    P :     this.motifP2_3state, 
-//                     R :     this.motifR1_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 2
-//              [ {    P :     this.motifP1_3state, 
-//                     R :     this.motifR2_3state, 
-//                     norm :  0.278 },  // type 3b
-//                {    P :     this.motifP2_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 3
-//              [ {    P :     this.motifP1_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.278 },  // type 3b
-//                {    P :     this.motifP2_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 4
-//              [ {    P :     this.motifP3_3state, 
-//                     R :     this.motifR1_3state, 
-//                     norm :  0.287 },  // type 3b
-//                {    P :     this.motifP4_3state, 
-//                     R :     this.motifR1_3state, 
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 5
-//              [ {    P :     this.motifP3_3state, 
-//                     R :     this.motifR1_3state, 
-//                     norm :  0.287 },  // type 3b
-//                {    P :     this.motifP4_3state, 
-//                     R :     this.motifR1_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 6
-//              [ {    P :     this.motifP3_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.300 },  // type 3b
-//                {    P :     this.motifP4_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ], // Level 1, Stage 7
-//              [ {    P :     this.motifP3_3state, 
-//                     R :     this.motifR2_3state, 
-//                     norm :  0.300 },  // type 3b
-//                {    P :     this.motifP4_3state, 
-//                     R :     this.motifR2_3state,
-//                     norm :  0.333 }  // type 1b                
-//              ] // Level 1, Stage 8
-//              ], // END LEVEL 1 
-//              [ 
-//              [ {    P :     this.motifP1_4state, 
-//                     R :     this.motifR1_4state, 
-//                     norm :  0.218 },  // type 3b
-//                 {   P :     this.motifP2_4state,
-//                     R :     this.motifR1_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 1
-//              [ {    P :     this.motifP1_4state, 
-//                     R :     this.motifR1_4state,
-//                     norm :  0.218 },  // type 3b
-//                {    P :     this.motifP2_4state,
-//                     R :     this.motifR1_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 2
-//              [ {    P :     this.motifP1_4state,  
-//                     R :     this.motifR2_4state,
-//                     norm :  0.229 },  // type 3b
-//                {    P :     this.motifP2_4state,
-//                     R :     this.motifR2_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 3
-//              [ {    P :     this.motifP1_4state, 
-//                     R :     this.motifR2_4state,
-//                     norm :  0.229 },  // type 3b
-//                {    P :     this.motifP2_4state,
-//                     R :     this.motifR2_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 4
-//              [ {    P :     this.motifP3_4state,
-//                     R :     this.motifR1_4state, 
-//                     norm :  0.219 },  // type 3b
-//                {    P :     this.motifP4_4state,
-//                     R :     this.motifR1_4state, 
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 5
-//              [ {    P :     this.motifP3_4state,  
-//                     R :     this.motifR1_4state,
-//                     norm :  0.219 },  // type 3b
-//                {    P :     this.motifP4_4state,  
-//                     R :     this.motifR1_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 6
-//              [ {    P :     this.motifP3_4state,  
-//                     R :     this.motifR2_4state,
-//                     norm : 0.229 },  // type 3b
-//                {    P :     this.motifP4_4state, 
-//                     R :     this.motifR2_4state,
-//                     norm :  0.25 }  // type 1b                
-//              ], // Level 2, Stage 7
-//              [ {    P :     this.motifP3_4state,  
-//                     R :     this.motifR2_4state,
-//                     norm :  0.229 },  // type 3b
-//                {    P :     this.motifP4_4state, 
-//                     R :     this.motifR2_4state, 
-//                     norm :  0.25 }  // type 1b                
-//              ] // Level 2, Stage 8
-//              ]
-//              ]
-//   //--------------------------------------------------------------------------
-//   // Set up constructor
-//   //--------------------------------------------------------------------------
-
-//  constructor(public storage: Storage, 
-//              private menuCtrl: MenuController, 
-//              private alertCtrl: AlertController, 
-//              private router: Router, 
-//              private http: HttpClient,
-//              private imageLoader: ImageLoaderService) {
-             
-//              }
-
-
-//   //--------------------------------------------------------------------------
-//   // Set up game
-//   //--------------------------------------------------------------------------
-
-//   // Initialize
-//   mdp : any; 
-
-//   // Images
-//   images = []; 
-  
-//   // Initialize agent
-//   initialstate = 1; 
-//   agent  = {
-//       state    : this.initialstate, 
-//       pts      : 0,
-//       swipes   : this.maxSwipes + (this.level-1)*10,  
-//       states   : new Array(this.initialstate),
-//       rewards  : new Array(),
-//       actions  : new Array(),
-//       times    : new Array(),
-//   };
-
-//   async reInitializeGame(){  
-
-//     // Initialize mdp
-//     this.mdp = new MDP(this.level,this.stage,this.random);
-
-
-//     // Initialize random seed if in UIC study and still working through first 4 sessions
-//     if (this.study == "SeqerUIC" && this.session < 5) {
-        
-//          // Set up random number generator with user*stage*level specific seed
-//          this.random    = new Random( (this.name.toLowerCase().charCodeAt(0)-97)+
-//                                       (this.name.toLowerCase().charCodeAt(1)-97)*30+
-//                                       (this.name.toLowerCase().charCodeAt(2)-97)*30*30+
-//                                       (this.name.toLowerCase().charCodeAt(3)-97)*30*30*30+
-//                                       (this.name.toLowerCase().charCodeAt(4)-97)*30*30*30*30+
-//                                       (this.name.toLowerCase().charCodeAt(5)-97)*30*30*30*30*30+
-//                                       this.level*30*30*30*30*30*30+
-//                                       this.stage*30*30*30*30*30*30*10);
-
-
-        
-
-//          // Shuffle states
-//         var states = [0,1,2,3,4,5];
-//         for (var i = this.level + 2 - 1; i > 0; i--) {
-//             var u = this.random.uniform(0,1);
-//             var j = Math.floor(u*(i+1));
-//             var temp = states[i];
-//             states[i] = states[j];
-//             states[j] = temp;
-//         }
-
-//         // Randomly select Motifs
-//          var m = 0; // <- FOCUS ON TYPE 3B; Math.floor(this.random.uniform(0,1)*2);
-//          var a = Math.floor(this.random.uniform(0,1)*2);
-//          this.mdp.norm = this.motifs[this.level-1][this.stage-1][m].norm;
-//          for (var i=0; i<this.level+2; i++){
-//             for (var j=0; j<this.level+2; j++){
-//                 this.mdp.P[0][i][j] = this.motifs[this.level-1][this.stage-1][m].P[a][states[i]][states[j]];
-//                 this.mdp.P[1][i][j] = this.motifs[this.level-1][this.stage-1][m].P[1-a][states[i]][states[j]];
-//              }
-//             this.mdp.R[i]    = this.motifs[this.level-1][this.stage-1][m].R[states[i]];
-//          }
-
-
-// 	}
-
-
-
-//     // Shuffle images
-//     this.images = this.imageUrls[this.level-1];
-//     for (var i = this.images.length - 1; i > 0; i--) {
-//         var u = this.random.uniform(0,1);
-//         var j = Math.floor(u*(i+1));
-//         var tmp = this.images[i];
-//         this.images[i] = this.images[j];
-//         this.images[j] = tmp;
-//     }
-
-//     // Pre-load Images
-//     for (var i=0; i<this.images.length; i++){
-//          await this.imageLoader.preload(this.images[i]);
-// 	}
-
-//     // Initialize agent
-//     this.initialstate = Math.floor(this.random.uniform(0,1)*this.mdp.nstates);
-   
-//     this.agent = {
-//       state    : this.initialstate, 
-//       pts      : this.mdp.initialPts,
-//       swipes   : this.maxSwipes + (this.level-1)*10,
-//       states   : [this.initialstate],
-//       rewards  : [],
-//       actions  : [],
-//       times    : [],
-//     }
- 
-
-//     // Initialize signage for points
-//     this.sign                 = (this.stage % 2) == 1 ? "+" : "";
-//     this.fab.el.style.opacity = 0; 
-//     this.pointCountDur        = 0; // Pause for 0.75 seconds to allow 
-
-//     // Initialize completed note 
-//     this.completed = 0;
-
-//     // Initialize counter
-//     this.timeLeft = this.timeMax;
-//     this.interval = 0;
-//     this.add      = 0;
-//     this.count    = 9;
-
-//     // Present start button
-//     const alert = await this.alertCtrl.create({
-//       header:    'Ready?',
-//       buttons:   [{
-//                 text: 'Yes',
-//                 cssClass: 'dark',
-//                 handler: () => {    
-//                         // Change opacity of image
-//                         this.stateImage.el.style.opacity = 1;
-                        
-//                         // Start timer
-//                         this.startTimer();
-
-//                 }
-//                 }],
-//       backdropDismiss: false
-//     });
-//     await alert.present();
-
-//   }
-  
-//   //--------------------------------------------------------------------------
-//   // Set up gestures
-//   //--------------------------------------------------------------------------
-  
-// // Get relevant element on page
-//   @ViewChild('stateImage', {static: false})
-//   stateImage: any;
-
-//   @ViewChild('fabfab', {static: false})
-//   fab: any;
-  
-//   // First time page is initialized 
-//   ngAfterViewInit(){
-
-//      // Turn off fab to start
-//     this.fab.el.style.opacity = 0;
-
-//     // Get info for swipes
-//     var style          = this.stateImage.el.style;
-//     const currentSrc   = this.stateImage.el.currentSrc;
-//     const windowWidth  = window.innerWidth;
-//     const windowHeight = window.innerHeight;
-
-//     // Swipe right gesture config
-//     const options: GestureConfig = {
-       
-//        // Swiped element
-//        el: this.stateImage.el,
-//        gestureName: "swipes",
-//        threshold: 0,
-
-//        // On Move
-//        onMove: (ev) => {
-//          style.transform = `translate(${1.8*ev.deltaX}px,${1.4*ev.deltaY}px)`;
-// 	   },
-       
-//        // End of gesture
-//        onEnd: (ev) => {
-//          // Ease out of screen
-//          style.transition       = "0.2s ease-in-out";
-//          if (ev.deltaX > windowWidth/5){
-//            this.action(0);
-//            style.transform       = '';
-//          } else if (ev.deltaX < -windowWidth/5){
-//            this.action(1);   
-//            style.transform  = '';
-//          } else {
-//            style.transform = '';
-//          }        
-//        },
-    
-//     }
-
-//     // create swipe gesture
-//     const swipe: Gesture = createGesture(options);
-    
-//     // Enable swipe
-//     swipe.enable(true);
-
-//   }
-
-
-//   // Left action
-//   action(a: number) {
-
-//       // Check if any swipes are left and image is not currently paused
-//       if (this.agent.swipes > 0 && this.imagePause == 0){
-//         // Update state and points
-//         this.agent.state     = this.mdp.transition(this.agent.state,a);
-      
-//         // Pause to update points and swipes
-//         this.imagePause      = this.imagePauseDur; // Pause to allow for transition before points are added
-//         this.currentR        = this.mdp.reward(this.agent.state);
-//         this.add             = this.add + this.currentR;
-//         this.agent.swipes    = this.agent.swipes - 1;
-//         this.pointCountDur   = this.pointCountDur0;
-
-//         // Update history
-//         this.agent.states.push(this.agent.state);
-//         this.agent.rewards.push(this.currentR);
-//         this.agent.actions.push(a);
-//         this.agent.times.push(this.timeMax-this.timeLeft + this.count/20);
-//       }
-
-//   }
-  
-//  //----------------------------------------------------------------------------
-//  // Countdown timer and point tally
-//  //----------------------------------------------------------------------------
-    
-//   // Initialize counter
-//   timeLeft   = this.timeMax;
-//   interval   = 0;
-//   add        = 0;
-//   count      = 39;
-//   imagePause = 0;
-  
-//   // Function for timer and point tally
-//   startTimer() {
-
-//     this.interval = setInterval(() => {
-
-//       // Check menu
-//       this.pauseTimer();
-//       // Check if menu is open
-//       if (!this.pause){
-
-//         // Display fab for certain amount of time
-//         if (this.pointCountDur>0){
-//           // Fade in opacity for new seqer plant
-//           this.pointCountDur--;
-//           this.fab.el.style.opacity = this.agent.states.length == 1 ? 0 : (this.pointCountDur-1)/this.pointCountDur0;
-// 		}
-
-//         // Check if allowing image to reload
-//         if (this.imagePause>0){
-//           //this.imagePause--;
-// 		} else if (this.add > 0 ){ // Check if points need to be added
-//           this.add--;
-//           this.agent.pts = this.agent.pts+1;
-//         } else if (this.add < 0){
-//           this.add++;
-//           this.agent.pts = this.agent.pts-1;
-// 		} else {
-//           if(this.agent.swipes > 0 && this.timeLeft > 0 && this.count == 0) {
-//             this.timeLeft=this.timeLeft-1;
-//             this.count   = 39;
-//           } else if (this.agent.swipes > 0 && this.timeLeft > 0 ){
-//             this.count--;
-//           } else {
-//             clearInterval(this.interval);
-//             this.presentAlert();
-//           }
-//         }
-//       }
-//     },25);
-//   };
-
-//   // Pause functionality for when menu is open
-//   pause       = false;
-//   openPromise = this.checkMenuOpen();
-//   pauseTimer() { //you can use this function if you want restart timer
-//     this.openPromise = this.checkMenuOpen();
-//     this.openPromise.then(value => {this.pause=value});
-//   }
-
-//   // Check whether menu is open
-//   checkMenuOpen(){
-//       return this.menuCtrl.isOpen("first");
-//   }
-
-//   // Pause reloading
-//   onImageLoad(){
-//     this.imagePause = 0;
-//   }
-
-//  //----------------------------------------------------------------------------
-//  // Leveling
-//  //----------------------------------------------------------------------------
-
-//  // Initialize variables
-//  mssg  = 'Well sought, Seqer. Onward?';
-//  bttns : any;
-
-//   async presentAlert() {
-
-//      // Out of time
-//      if (this.agent.swipes > 0){
-//         this.agent.pts = 0;
-//         this.mssg      = 'Out of time. Try again?'
-
-//         // Update buttons
-//         this.bttns = [{
-//                 text: 'No.',
-//                 cssClass: 'secondary',
-//                 handler: () => {
-
-
-//                   // Quit
-//                   this.router.navigate(['/home']);
-//                  }
-//                 },
-//                {
-//                 text: 'Yes.',
-//                 handler: () => {
-
-//                 // Navigate to next game
-//                 this.router.navigate(['/play']);
-
-//                 // Update game
-//                 this.reInitializeGame();
-//                 }
-//                }];
-
-//      // Did not pass or force pass because of specific study
-// 	 } else if (this.agent.pts < this.mdp.avgtotal && (this.study=="SeqerUIC" && this.session > 4.5) ) {
-     
-//         this.mssg      = "Not quite. Need " + Math.round(this.mdp.avgtotal).toString() + " pts to continue. Try again?";
-
-//         // Update buttons
-//         this.bttns = [{
-//                 text: 'No.',
-//                 cssClass: 'secondary',
-//                 handler: () => {
-
-//                   // Quit
-//                   this.router.navigate(['/home']);
-//                  }
-//                 },
-//                {
-//                 text: 'Yes.',
-//                 handler: () => {
-
-//                 // Navigate to next game
-//                 this.router.navigate(['/play']);
-
-//                 // Update game
-//                 this.reInitializeGame();
-//                 }
-//                }];
-
-//      // Passed last stage
-// 	 } else if (this.stage == this.maxStages){
-
-//         // Update message
-//         this.mssg = 'Level complete.';
-
-//         // Possible study specific message
-//         if (this.study == "SeqerUIC" && this.session==2.5){
-//             var token1 = (Math.floor(Math.random()*1000) * 29).toString();
-//             this.storage.set('UICtoken1',token1);
-//             this.mssg = "Level complete. You have now completed your first session of Seqer. Course credit can be obtained with the following unique code: " + 
-//                          token1;
-//         } else if ( this.study == "SeqerUIC" && this.session==4.5){
-//             var token2 = (Math.floor(Math.random()*1000) * 37).toString();
-//             this.storage.set('UICtoken2',token2);
-//             this.mssg = "Level complete. You have now completed your second session of Seqer. Course credit can be obtained with the following unique code: " + 
-//                         token2;  
-// 		}
-
-//         // Update buttons
-//         this.bttns = [{
-//               text: 'Ok',
-//               cssClass: 'secondary',
-//               handler: () => {
-//                 // Update levels and stage
-//                 this.level = Math.min(this.level+1,4);
-//                 this.stage = 1;
-
-//                 // Navigate to next page (depending on study and level)
-//                 if (this.study == "SeqerUIC" && this.session < 5){    
-                
-//                     //if (this.level == 2){
-//                     //    // Navigate to play page
-//                     //    this.router.navigate(['/play']);
-                        
-//                         // Update game
-//                     //    this.reInitializeGame();
-//                     //} else {
-         
-//                         // Update session
-//                         this.session = this.session+0.5;
-
-//                         if (this.session != 3){
-//                             // Re-set             
-//                             this.level   = 1;
-//                             this.stage   = 1;
-//                             this.best.levels = ["1.1"];
-
-//                             // Navigate to play page
-//                             this.router.navigate(['/play']);
-
-//                             // Update game
-//                             this.reInitializeGame();
-
-                            
-// 						} else if (this.session == 3){
-          
-//                             // Re-set             
-//                             this.level   = 1;
-//                             this.stage   = 1;
-//                             this.best.levels = ["1.1"];
-
-//                              // Set block time
-//                             this.storage.set("blockDate", Date());
-
-//                             // Navigate to block page
-//                             this.router.navigate(['/block']);
-          
-// 						} else {
-
-//                             // Navigate to block page
-//                             this.router.navigate(['/home']);
-          
-// 						}
-
-
-// 					//}
-
-//                 } else {
-//                     this.router.navigate(['/home']);    
-// 				}
-
-//               }
-//          }];
-
-//          // Unlock next level and mark progress
-//          if (this.level < 4 && this.best.levels.length<this.maxStages*(this.level-1)+this.stage+1){
-//             this.best.levels.push((this.level+1).toString()+".1");
-//          }
-     
-//      // Passed stage
-// 	 } else {
-     
-//        // Initialize variables
-//        this.mssg  = 'Well sought, Seqer. Onward?';
-//        this.bttns = [{
-//                 text: 'No.',
-//                 cssClass: 'secondary',
-//                 handler: () => {
-
-//                   // Quit
-//                   this.router.navigate(['/home']);
-//                  }
-//                 },
-//                {
-//                 text: 'Yes.',
-//                 handler: () => {
-
-//                 // Navigate to next game
-//                 this.router.navigate(['/play']);
-
-//                 // Update game and stage
-//                 this.stage = this.stage+1;                // Increment stage
-//                 this.reInitializeGame();
-//                 }
-//                }];
-
-//        // Unlock next stage and mark progress
-//        if (this.best.levels.length < this.maxStages*(this.level-1)+this.stage+1){
-//           this.best.levels.push(this.level.toString()+"."+(this.stage+1).toString());
-//        }
-
-
-// 	 }
-
-//     // Send game results
-//     this.completed = 1;
-//     this.sendGameResults();
-    
-//     const alert = await this.alertCtrl.create({
-//       subHeader:    'Best: '   + this.best.score.toString(),
-//       header:       'Latest: ' + this.agent.pts.toString(),
-//       message:   this.mssg,
-//       buttons:   this.bttns,
-//       backdropDismiss: false
-//     });
-
-//     await alert.present();
-//   }
-
-  
-// // Send game results
-//  sendGameResults() {
-
-//      // Update total if better
-//      if (this.completed == 1 && this.agent.pts > this.best.score) {         
-//         this.best.score = this.agent.pts;
-//         this.best.level = this.level.toString() + "." + this.stage.toString(); 
-// 	 }
-
-
-//     // Store data
-//      this.best.animate = this.progress[this.best.levels.length-1];
-//      this.storage.set('best',this.best);
-//      this.storage.set('stage',this.stage);
-//      this.storage.set('level',this.level);
- 
-  //  // post to lorevimo.com 
-  //  this.http.post('https://lorevimo.com/seqer/game.php',{
-  //           "jwt":       this.jwt,
-  //           "token":     "K7tKmqMM4Pse:1pmNQuF3r/xpK$C6$",
-  //           "name":      this.name,
-  //           "level":     JSON.stringify(this.level),
-  //           "stage":     JSON.stringify(this.stage),
-  //           "mdp":       JSON.stringify({"P" : this.mdp.P, "R" : this.mdp.R, "normalization" : this.mdp.norm} ),
-  //           "agent":     JSON.stringify(this.agent),
-  //           "completed": JSON.stringify(this.completed),
-  //   },{responseType: 'text'}).subscribe();
-
-
-     
-
-//   }
-
-
-//  //----------------------------------------------------------------------------
-//  // Life cycle event
-//  //----------------------------------------------------------------------------
-
-//  async ionViewWillEnter(){
-
-//     // Change opacity of image
-//     this.stateImage.el.style.opacity = 0;
-
-//     // Get information from local storage
-//     this.level   = await this.storage.get('level');
-//     this.stage   = await this.storage.get('stage');
-//     this.name    = await this.storage.get('name');
-//     this.jwt     = await this.storage.get('jwt');
-//     this.best    = await this.storage.get('best');
-//     this.study   = await this.storage.get('study');
-//     this.session = await this.storage.get('session');
-    
-//     // Update level and stage for specific study
-//     if ( this.study == "SeqerUIC" && this.session < 5){
-//         this.level = parseInt( this.best.levels[this.best.levels.length-1].substr(0,1) );
-//         this.stage = parseInt( this.best.levels[this.best.levels.length-1].substr(2,3) );    
-// 	}
-
-
-//     // Reinitialize game
-//     clearInterval(this.interval);
-//     this.imageLoader.clearCache();
-//     this.reInitializeGame();
- 
-//   }
-
-//   ionViewWillLeave(){
-
-//      // Clear interval and image cache
-//      clearInterval(this.interval);
-//      this.imageLoader.clearCache();
-
-//      // Save data
-//      this.saveData();
-
-//   }
-
-//   saveData(){
-  
-//   // Send incomplete results if game not completed
-//      if (this.completed == 0){
-//        // Send game results
-//        this.sendGameResults();
-
-// 	 } else {
-//           // Update total if better
-//          if (this.agent.pts > this.best.score) {         
-//             this.best.score = this.agent.pts;
-//             this.best.level = this.level.toString() + "." + this.stage.toString(); 
-//         }
-
-//         // Update storage
-//         this.best.animate = this.progress[this.best.levels.length-1];
-//         this.storage.set('best',this.best);
-//         this.storage.set('stage',this.stage);
-//         this.storage.set('level',this.level); 
-//      }
-//      this.storage.set('session',this.session);
-//   }
-
-
-//   // Dummy action
-//   ngOnInit(){
-//   }
-
-
-//}

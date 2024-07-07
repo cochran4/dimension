@@ -1,0 +1,70 @@
+number_actions: 3
+number_states: 1
+number_trials: 5
+state_transition: |
+  (current_state, action, params) => {
+    return 0; // Bandit case (i.e., single state)
+  }
+reward_transition: |
+  (current_state, next_state, action, params) => {
+    const reward_success = params.reward_success[0]*action[0] + 
+                           params.reward_success[1]*action[1] + 
+                           params.reward_success[2]*action[2];
+    let successes = 0;
+    for (let i = 0; i < params.reward_max; i++) {
+        if (Math.random() < reward_success) { // Simulate a Bernoulli trial with success probability reward_success
+            successes += 1;
+        }
+    }
+    return successes; // Binomial random variable
+  }
+image_transition: |
+  (current_state, next_state, action, params) => {
+    const image_success = params.image_success[0]*action[0] + 
+                          params.image_success[1]*action[1] + 
+                          params.image_success[2]*action[2];
+    return Math.random() < image_success; // Bernoulli random variable
+  }
+background_images: 
+  - "/assets/textures/state6.jpg"
+negative_images: 
+- "/assets/negative/HF01_AO.jpg"
+- "/assets/negative/BM08_SO.jpg"
+- "/assets/negative/BF20_SC.jpg"
+- "/assets/negative/HF09_AO.jpg"
+- "/assets/negative/AM04_SC.jpg"
+- "/assets/negative/BM16_FO.jpg"
+- "/assets/negative/AM10_AO.jpg"
+- "/assets/negative/BF09_AC.jpg"
+- "/assets/negative/BM01_FC.jpg"
+- "/assets/negative/BF14_SO.jpg"
+- "/assets/negative/BF16_AO.jpg"
+- "/assets/negative/BM03_AC.jpg"
+- "/assets/negative/AM09_SC.jpg"
+- "/assets/negative/BM08_SC.jpg"
+- "/assets/negative/AF03_FO.jpg"
+- "/assets/negative/HF04_AO.jpg"
+- "/assets/negative/BM05_SO.jpg"
+- "/assets/negative/BF18_FO.jpg"
+- "/assets/negative/HF08_FO.jpg"
+- "/assets/negative/BF03_FC.jpg"
+- "/assets/negative/BF15_SC.jpg"
+- "/assets/negative/AF03_AC.jpg"
+- "/assets/negative/BM16_AC.jpg"
+- "/assets/negative/AF08_AO.jpg"
+- "/assets/negative/BF02_SC.jpg"
+- "/assets/negative/AM08_SO.jpg"
+- "/assets/negative/BF20_FO.jpg"
+- "/assets/negative/AF10_AC.jpg"
+- "/assets/negative/HF02_FC.jpg"
+- "/assets/negative/HF7_SO.jpg"
+additional_params:
+  reward_success: [0.1, 0.7, 0.9]
+  image_success:  [0.1, 0.7, 0.9]
+  reward_max: 10
+  num_images: 30
+instructions:
+  - "Let's go over the rules..."
+
+
+

@@ -20,10 +20,16 @@ ion-fab-button {
    height: 84px;
 }
 
-// .fab-horizontal-center {
-//    margin-left: unset;
-//    margin-inline-start: -50px !important;
-// }
+.custom-alert .alert-wrapper {
+  --background: #333333;
+  --color: #ffffff;
+  --button-background: #444444;
+  --button-color: #ffffff;
+}
+
+.custom-alert .alert-message {
+  text-align: center;
+}
 
 // Toggle visiability
 .transition-element {
