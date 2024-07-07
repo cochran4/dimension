@@ -23,17 +23,7 @@ image_transition: |
     const image_success = params.image_success[0]*action[0] + 
                           params.image_success[1]*action[1] + 
                           params.image_success[2]*action[2];
-    const random_value = Math.random(); // Generate a random value between 0 and 1
-    let sum = 1-image_success;
-    let category = 0;
-    for (let i = 0; i < params.num_images+1; i++) {
-        if (random_value <= sum) {
-            category = i;
-            break;
-        }
-        sum += image_success/params.num_images;
-    }
-    return category; // Categorical random variable
+    return Math.random() < image_success; // Bernoulli random variable
   }
 background_images: 
   - "/assets/textures/state6.jpg"
