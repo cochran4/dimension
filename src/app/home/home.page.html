@@ -9,12 +9,38 @@
 <ion-content [fullscreen]="true">
   
   <div class="content-container">
-    <div id="instructions">
-      <strong>Instructions go here.</strong>
-      <p>More info</p>
-    </div>
 
-    <ion-button (click)="navigatePlay()">Ready!</ion-button>
+    <ion-card>
+
+      <ion-card-header>
+        <ion-card-title>Parent Consent Verification</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        (subject to change) Thank you for participating in this study. Before beginning, we'd first like to get your parent's consent for your participation. <br>
+        Once you've confirmed your age and entered your parent's email address, a special 4-character access code will be emailed to that address. You must enter the access code to continue.
+      </ion-card-content>
+
+      <ion-item class="ion-text-nowrap">
+        <ion-checkbox style="--size: 24px;" slot="end" [(ngModel)]="ageConfirmed"></ion-checkbox>
+        <ion-label slot="start"><strong>Confirm your age is between 11 and 17:</strong></ion-label>
+      </ion-item>
+
+      <ion-item class="ion-text-nowrap">
+        <ion-label><strong>Enter parent's email:</strong></ion-label>
+        <ion-input type="email" [(ngModel)]="email"></ion-input>
+        <ion-button slot="end" style="font-size: 16px" (click)="sendEmail()" [disabled]="sent || !ageConfirmed || !email">Send code</ion-button>
+      </ion-item>
+
+      <ion-item class="ion-text-nowrap">
+        <ion-label><strong>Enter code:</strong></ion-label>
+        <ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode"></ion-input>
+      </ion-item>
+
+      <ion-button (click)="validate()">Continue</ion-button>
+
+    </ion-card>
+
   </div>
   
 

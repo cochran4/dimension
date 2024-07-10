@@ -3,7 +3,7 @@
     <ion-row id="header">
       <ion-col size="12">
         <!-- Display Instructions -->
-        <p style="text-align: center; font-weight: bold; color: #373333;">{{ instructions }}</p>
+        <p style="text-align: center; font-weight: bold;">{{ instructions }}</p>
       </ion-col>
     </ion-row>
   </ion-toolbar>
@@ -15,7 +15,7 @@
   <ion-card *ngFor="let item of items; let i = index" style="border-radius: 10px; margin: 10px;">
     <ion-card-content>
       <ion-item lines="none" style="margin-bottom: 10px;">
-        <ion-label style="color: #373333;">{{ item.name }}</ion-label>
+        <ion-label>{{ item.name }}</ion-label>
         <ion-select [(ngModel)]="item.value" interface="popover" (ionChange)="changeValue($event, i)">
           <ion-select-option *ngFor="let value of item.values" [value]="value">{{ value }}</ion-select-option>
         </ion-select>

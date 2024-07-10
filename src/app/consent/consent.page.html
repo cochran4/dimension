@@ -1,17 +1,32 @@
 <ion-content>
   <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <p style="text-align: center; font-size: larger; margin: 0;">University of Wisconsin-Madison</p>
+        <p style="text-align: center; font-size: larger; margin: 0;">Child Assent to Participate in Research</p>
+      </ion-card-title>
+    </ion-card-header>
+  
     <ion-card-content>
       <ion-text class="ion-text-left ion-padding">
         <h3>
-          <strong>Protocol title:</strong> 
+          <strong>Study Title for Participants:</strong> 
+          Decision making with rewards and risks in youth
+        </h3>
+        <h3>
+          <strong>Formal Study Title:</strong>
           Development of multi-dimensional decision making in typically developing and trauma-exposed youth (DIMENSION)
         </h3>
         <h3>
-          <strong>Principal Investigator:</strong> 
-          Amy Cochran, University of Wisconsin-Madison, Department of Population Health Sciences
+          <strong>Lead Researcher:</strong> 
+          Amy Cochran, (608) 262-0772, 610 Walnut St, Madison, WI
+        </h3>
+        <h3>
+          <strong>Institution:</strong>
+          University of Wisconsin
         </h3>
         <p>
-          We are trying to learn how young people make decisions that involve both risks and rewards, because how they make decisions is often related to their emotional health.
+          We are trying to learn how young people make decisions that involve both risks and rewards. Understanding this type of decision-making may inform strategies to promote better mental health outcomes for youth.
         </p>
         <p> 
           We are asking you to participate in this study because you are between the ages of 11 and 17. We aim to include 30 young people like you in this research.
@@ -25,24 +40,29 @@
           <li>Provide feedback on how easy it was to understand and play the game.</li>
         </ul>
         <p> 
-          The research will take about 30 minutes. While there may not be direct benefits to you, your participation may help us learn things that could benefit other young people in the future.
+          The study will take about 30 minutes and can be completed entirely online. While there may be no direct benefits to you, your participation may help us learn things about decision making that could benefit other young people in the future.
         </p>
         <p>
-          Your responses will be anonymous. However, we may ask you sensitive questions about your emotions, and like any research, there may be unforeseen risks.
+          Your responses will be anonymous. However, we may ask you sensitive questions about your feelings and you may see images of faces of people who look sad, angry, or fearful. Like any research, there may be unforeseen risks.
         </p>
         <p>
-          Both you and your parent or guardian must consent to your participation. It is also okay for you to decide not to participate, without any consequences. If you choose not to participate, simply close this window.
+          If you agree to take part in this research study, we will provide you a $10 gift card. You can choose from several companies (e.g., Apple, Starbucks, eBay).
         </p>
         <p>
-          By checking the box and clicking 'Agree', you or your guardian affirm that you have read and understood this consent form and agree to participate in the study.
+          Both you and your parent or guardian need must agree to your participation. It is okay for you to decide not to participate, without any consequences. If you choose not to participate, simply close this window. Should you have any additional questions, you may email the research team at seqer&#64;math.wisc.edu.
+        </p>
+        <p>
+          If you check the box below and click “Agree,” it means that you have read this permission form and agree to be in this study.
         </p>
       </ion-text>
       <ion-item>
-        <ion-label>I agree to participate</ion-label>
+        <ion-label><h3>I agree to participate</h3></ion-label>
         <ion-checkbox slot="start" [(ngModel)]="consentGiven"></ion-checkbox>
       </ion-item>
-
+  
       <ion-button expand="block" type="submit" (click)="submitConsent()" [disabled]="!consentGiven">Agree</ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>
+
+

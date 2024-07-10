@@ -1,5 +1,8 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { ConsentGuard } from './guards/consent.guard';
+import { FinishGuard } from './guards/finish.guard';
+import { HomePageModule } from './home/home.module';
 
 const routes: Routes = [
   {
@@ -12,21 +15,29 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'play',
-    loadChildren: () => import('./play/play.module').then( m => m.PlayPageModule)
-  },
-  {
-    path: 'thank-you',
-    loadChildren: () => import('./thank-you/thank-you.module').then( m => m.ThankYouPageModule)
+    path: 'consent',
+    loadChildren: () => import('./consent/consent.module').then( m => m.ConsentPageModule),
+    canActivate: [ConsentGuard]
   },
   {
     path: 'demography',
-    loadChildren: () => import('./demography/demography.module').then( m => m.DemographyPageModule)
+    loadChildren: () => import('./demography/demography.module').then( m => m.DemographyPageModule),
+    canActivate: [ConsentGuard]
   },
   {
-    path: 'consent',
-    loadChildren: () => import('./consent/consent.module').then( m => m.ConsentPageModule)
+    path: 'play',
+    loadChildren: () => import('./play/play.module').then( m => m.PlayPageModule),
+    canActivate: [ConsentGuard]
   },
+  {
+    path: 'thank-you',
+    loadChildren: () => import('./thank-you/thank-you.module').then( m => m.ThankYouPageModule),
+    canActivate: [ConsentGuard, FinishGuard]
+  },
+  {
+    path: "**",
+    redirectTo: '/home'
+  }
 ];
 
 @NgModule({

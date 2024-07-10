@@ -1,6 +1,6 @@
-ion-content {
-  --ion-background-color: #fff; /* Optional: Adjust background color as needed */
-}
+// ion-content {
+//   --ion-background-color: #fff; /* Optional: Adjust background color as needed */
+// }
 
 .content-container {
   height: 100%;
@@ -11,6 +11,16 @@ ion-content {
   text-align: center;
 }
 
-#instructions {
-  margin-bottom: 20px; /* Adjust the space between the instructions and the button */
+ion-card {
+  padding: 1%;
+  width: 50%;
+}
+
+ion-card-title {
+  font-size: x-large;
+}
+
+ion-card-content {
+  font-size: large;
+  text-align: left;
 }

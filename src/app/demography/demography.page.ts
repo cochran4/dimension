@@ -99,7 +99,7 @@ export class DemographyPage implements OnInit {
           {
             text: 'Continue',
             handler: () => {
-              this.submitDemography();
+              this.submitData();
             }
           }
         ]
@@ -108,37 +108,58 @@ export class DemographyPage implements OnInit {
       await alert.present();
     } else {
       // If all questions are answered, proceed with submission
-      this.submitDemography();
+      this.submitData();
     }
   }
 
-  submitDemography() {
-    // Save current responses
-    this.allResponses.push(...this.items.map(item => ({
+  // submits data for each stage
+  submitData() {
+    // // Save current responses
+    // this.allResponses.push(...this.items.map(item => ({
+    //   question: item.name,
+    //   answer: item.value
+    // })));
+
+    // get responses for this stage
+    const responses = this.items.map(item => ({
       question: item.name,
       answer: item.value
-    })));
+    }))
+
+    // submit responses based on survey type
+    const table_name = this.stage === 1 ? "demography" : "affect"; // figure out which table
+    const submissionData = { jwt: this.jwt, name: this.name, table: table_name, responses: responses };
+    this.http.post('https://example.com/submit', submissionData, { responseType: 'text' })
+      .subscribe({
+        next: (response) => {
+          console.log(`${table_name} data submitted successfully:`, response);
+        },
+        error: (error) => console.error(`Error submitting ${table_name} data:`, error)
+    });
 
     if (this.stage === 1) {
       // Load the second survey if it's the first stage
       this.loadSurvey('affect-survey.json');  // Adjust this as needed for your second survey file
       this.stage++;
     } else {
-      // Submit all data if it's the final stage
-      this.submitAllData();
+      this.router.navigate(['/play']);
     }
   }
 
-  submitAllData() {
-    // Here you might include additional data, such as JWT or user name
-    const submissionData = { jwt: this.jwt, name: this.name, responses: this.allResponses };
-    this.http.post('https://example.com/submit', submissionData, { responseType: 'text' })
-      .subscribe({
-        next: (response) => {
-          console.log('All survey data submitted successfully:', response);
-          this.router.navigate(['/play']);  // Redirect to a thank you page or similar
-        },
-        error: (error) => console.error('Error submitting all survey data:', error)
-      });
-  }
+  // submitAllData() {
+  //   // Here you might include additional data, such as JWT or user name
+  //   const table_name = this.stage === 1 ? "demography" : "affect";
+  //   const submissionData = { jwt: this.jwt, name: this.name, responses: this.allResponses, table: table_name };
+  //   this.http.post('https://example.com/submit', submissionData, { responseType: 'text' })
+  //     .subscribe({
+  //       next: (response) => {
+  //         console.log('All survey data submitted successfully:', response);
+  //         this.router.navigate(['/play']);  // Redirect to a thank you page or similar
+  //       },
+  //       error: (error) => console.error('Error submitting all survey data:', error)
+  //   });
+
+  //   // !!! navigate to play page anyway for now, delete later once data submission is set up
+  //   this.router.navigate(['/play']);
+  // }
 }
