@@ -1,52 +1,52 @@
 {
     "questions": [
       {
-        "name": "Mad",
+        "name": "mad",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Joyful",
+        "name": "joyful",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Sad",
+        "name": "sad",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Proud",
+        "name": "proud",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Cheerful",
+        "name": "cheerful",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Scared",
+        "name": "scared",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Happy",
+        "name": "happy",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Afraid",
+        "name": "afraid",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Lively",
+        "name": "lively",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       },
       {
-        "name": "Miserable",
+        "name": "miserable",
         "value": -1,
         "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
       }

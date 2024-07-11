@@ -127,12 +127,6 @@ export class DemographyPage {
 
   // submits data for each stage
   submitData() {
-    // // Save current responses
-    // this.allResponses.push(...this.items.map(item => ({
-    //   question: item.name,
-    //   answer: item.value
-    // })));
-
     // get responses for this stage
     const responses = this.items.map(item => ({
       question: item.name,
@@ -140,13 +134,14 @@ export class DemographyPage {
     }))
 
     console.log(responses)
+    let table_name = this.table_name
 
     // submit responses based on survey type
-    const submissionData = { jwt: this.jwt, name: this.name, table_name: this.table_name, data: responses };
+    const submissionData = { jwt: this.jwt, name: this.name, table_name: table_name, data: responses };
     this.http.post('https://www.lorevimo.com/dimension/survey.php', submissionData, { responseType: 'text' })
       .subscribe({
         next: (response) => {
-          console.log(`${this.table_name} data submitted successfully:`, response);
+          console.log(`${table_name} data submitted successfully:`, response);
         },
         error: (error) => console.error(`Error submitting ${this.table_name} data:`, error)
     });

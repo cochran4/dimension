@@ -32,7 +32,7 @@ const routes: Routes = [
   {
     path: 'thank-you',
     loadChildren: () => import('./thank-you/thank-you.module').then( m => m.ThankYouPageModule),
-    canActivate: [ConsentGuard]
+    canActivate: [ConsentGuard, FinishGuard]
   },
   {
     path: 'goodbye',
