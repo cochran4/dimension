@@ -35,9 +35,14 @@ const routes: Routes = [
     canActivate: [ConsentGuard, FinishGuard]
   },
   {
+    path: 'goodbye',
+    loadChildren: () => import('./goodbye/goodbye.module').then( m => m.GoodbyePageModule)
+  },
+  {
     path: "**",
     redirectTo: '/home'
-  }
+  },
+
 ];
 
 @NgModule({

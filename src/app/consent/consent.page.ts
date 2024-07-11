@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
+import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-consent',
@@ -9,14 +11,39 @@ import { Router } from '@angular/router';
 export class ConsentPage {
   consentGiven: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,
+              private alertCtrl: AlertController,
+              private storage: Storage) {}
 
-  submitConsent() {
+  async ngOnInit() {
+    await this.storage.create()
+  }
+
+  async submitConsent() {
     if (this.consentGiven) {
       this.router.navigate(['/demography']); // Navigate to the Demography page
     } else {
-      // Optionally handle the case where consent is not given (already handled by button being disabled)
-      console.log('Consent not given');
+      const alert = await this.alertCtrl.create({
+        header: 'Warning!',
+        subHeader: 'You did not check the box indicating your agreement to participation.',
+        message: 'If this is not what you meant to do, please click "Cancel" and check the box before submitting again. Otherwise, please click "Continue" to skip to the end.',
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            cssClass: 'secondary'
+          },
+          {
+            text: 'Continue',
+            handler: () => {
+              this.storage.set('error', 'no consent');
+              this.router.navigate(['/goodbye']);
+            }
+          }
+        ]
+      });
+
+      await alert.present();
     }
   }
 }
