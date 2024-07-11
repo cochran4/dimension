@@ -19,7 +19,7 @@ export class FinishGuard implements CanActivate {
 
   async canActivate(): Promise<boolean> {
       const finished = await this.storage.get("finished");
-      if (finished && (finished == "true")) {
+      if (finished) {
         return true;
       } else {
         return false;

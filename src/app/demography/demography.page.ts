@@ -9,7 +9,7 @@ import { AlertController } from '@ionic/angular';
   templateUrl: './demography.page.html',
   styleUrls: ['./demography.page.scss'],
 })
-export class DemographyPage implements OnInit {
+export class DemographyPage {
 
   //--------------------------------------------------------------------------
   // Initialize variables
@@ -22,6 +22,7 @@ export class DemographyPage implements OnInit {
   stage = 1;  // Keep track of the survey stage
   allResponses: any[] = [];  // Store all responses across different surveys
   instructions: string = '';
+  table_name: string = '';
 
   //--------------------------------------------------------------------------
   // Constructor
@@ -45,8 +46,8 @@ export class DemographyPage implements OnInit {
     this.storage = await this.storageService.create();
   }
 
-  async ngOnInit() {
-    await this.init(); // Ensure storage is initialized
+  async ionViewWillEnter() {
+    await this.init()
 
     // Get JWT and username from storage
     this.storage?.get('jwt').then((val: string | null) => {
@@ -56,20 +57,32 @@ export class DemographyPage implements OnInit {
       if (val) this.name = val;
     });
 
-    // Load the first survey stage
-    this.loadSurvey('demography-survey.json');  // Adjust this as needed for your first survey file
+    this.stage = await this.storage?.get('survey stage') || 1;
+    console.log(this.stage)
+
+    this.loadSurvey()
   }
 
   //--------------------------------------------------------------------------
   // Helper events
   //--------------------------------------------------------------------------
 
+  // loads survey based on what stage we're on
+  loadSurvey() {
+    let survey_map: { [key: number]: string } = {
+      [1]: 'demography-survey.json',
+      [2]: 'affect-survey.json',
+      [3]: 'usability-survey.json'
+    };
 
-  loadSurvey(fileName: string) {
+    const fileName = survey_map[this.stage];
+    console.log("file name: " + fileName);
+
     this.http.get(`/assets/${fileName}`).subscribe({
       next: (data: any) => {
         this.items = data.questions;
         this.instructions = data.instructions; // Assuming 'instructions' is a top-level field in your JSON
+        this.table_name = data.table_name;
       },
       error: (error) => console.error('Could not load survey data:', error)
     });
@@ -126,24 +139,49 @@ export class DemographyPage implements OnInit {
       answer: item.value
     }))
 
+    console.log(responses)
+
     // submit responses based on survey type
-    const table_name = this.stage === 1 ? "demography" : "affect"; // figure out which table
-    const submissionData = { jwt: this.jwt, name: this.name, table: table_name, responses: responses };
-    this.http.post('https://example.com/submit', submissionData, { responseType: 'text' })
+    const submissionData = { jwt: this.jwt, name: this.name, table_name: this.table_name, data: responses };
+    this.http.post('https://www.lorevimo.com/dimension/survey.php', submissionData, { responseType: 'text' })
       .subscribe({
         next: (response) => {
-          console.log(`${table_name} data submitted successfully:`, response);
+          console.log(`${this.table_name} data submitted successfully:`, response);
         },
-        error: (error) => console.error(`Error submitting ${table_name} data:`, error)
+        error: (error) => console.error(`Error submitting ${this.table_name} data:`, error)
     });
 
-    if (this.stage === 1) {
-      // Load the second survey if it's the first stage
-      this.loadSurvey('affect-survey.json');  // Adjust this as needed for your second survey file
-      this.stage++;
-    } else {
+    this.stage++;
+    this.storage?.set('survey stage', this.stage);
+    console.log('next stage: ' + this.stage)
+
+    if (this.stage == 2) { // finished first survey, go to second
+      this.loadSurvey();
+    } else if (this.stage == 3) { // finished second stage, go to play
       this.router.navigate(['/play']);
+    } else if (this.stage == 4) { // finished everything, go to thank you
+      this.storage?.set('finished', true)
+      this.router.navigate(['/thank-you']);
     }
+
+    // if (this.stage === 1) {
+    //   // Load the second survey if it's the first stage
+    //   this.stage++;
+    //   this.storage?.set('survey stage', this.stage);
+    //   this.loadSurvey();  // Adjust this as needed for your second survey file
+    // } 
+    // else if (this.stage === 2) {
+    //   this.stage++;
+    //   this.storage?.set('survey stage', this.stage)
+    //   this.router.navigate(['/play']);
+    // }
+    // else if (this.stage === 3) {
+    //   this.stage++;
+    //   this.storage?.set('survey stage', this.stage)
+    //   this.loadSurvey();
+    // } else {
+    //   this.router.navigate(['/thank-you']);
+    // }
   }
 
   // submitAllData() {

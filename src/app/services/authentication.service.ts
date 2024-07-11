@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
 import { Storage } from '@ionic/storage-angular';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,8 @@ import { map, tap, switchMap } from 'rxjs/operators';
 export class AuthenticationService {
 
   isAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  token = '';
+  jwt = '';
+  gift_url = '';
 
   constructor(private http: HttpClient, private storage: Storage) { 
     this.init()
@@ -22,53 +23,62 @@ export class AuthenticationService {
 
   async ngOnInit() {
     await this.init();
-    await this.loadToken();
+    await this.loadJWT();
   }
 
-  async loadToken() {
-    const token = await this.storage.get("jwt");
-    if (token) {
-      console.log('token found: ', token);
-      this.token = token;
+  async loadJWT() {
+    const jwt = await this.storage.get("jwt");
+    if (jwt) {
+      console.log('jwt found: ', jwt);
+      this.jwt = jwt;
       this.isAuthenticated.next(true);
     } else {
       this.isAuthenticated.next(false);
     }
   }
 
-  login(info: {
+  register(info: {
     name: string,
     study: string
   }): Observable<boolean> {
 
-    // temp code until backend is setup
-    this.storage.set("name", "some_name");
-    this.storage.set("gift_url", "https://www.google.com");
-    this.storage.set("study", "study_name");
-    this.storage.set("jwt", `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxNzgzMSwiaWF0IjoxNzE5NDE3ODMxfQ.OBTzujidFAU8qOY2HQMv_OnvePDFLCoxp6uqJgmseoM`)
-    this.isAuthenticated.next(true);
-    return of(true);
+    const {name, study} = info
 
-    // return this.http.post("backendserver.com", info).pipe(
-    //   map((data: any) => (data.token, data.gift_url)), 
-    //   switchMap((token, gift_url) => {
-    //     if (gift_url) {
-    //      this.storage.set("name", info.name);
-    //      this.storage.set("study", info.study);
-    //      this.storage.set("token", token);
-    //      this.storage.set("gift_url", gift_url)
-    //       return of(true);
-    //     } else {
-    //       return of(false);
-    //     }
-    //   }),
-    //   tap((res) => {
-    //     if (res) {
-    //       this.isAuthenticated.next(true);
-    //     } else {
-    //       this.isAuthenticated.next(false);
-    //     }
-    //   })
-    // )
+    return this.http.post('https://www.lorevimo.com/dimension/add_user.php', info, {responseType: 'text'}).pipe(
+      switchMap(response => {
+        const res = JSON.parse(response);
+        console.log(res);
+        this.jwt = res.jwt;
+        this.gift_url = res.gift_url
+
+        console.log('received jwt: ' + this.jwt);
+        console.log('received gift_url ' + this.gift_url);
+
+        if (this.gift_url != '') {
+          return from(Promise.all([
+            this.storage.set('name', name),
+            this.storage.set('study', study),
+            this.storage.set('jwt', this.jwt),
+            this.storage.set('gift_url', this.gift_url)
+          ]).then(() => true))
+        }
+    
+        return of(false);
+      }),
+      catchError(() => {
+
+        // temp until backend has more gift_urls to send
+        this.storage.set('name', name),
+        this.storage.set('study', study),
+        this.storage.set('jwt', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcxOTY3NjkzMiwiZXhwIjoxNzIxNDkxMzMyLCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlciIsInN0dWR5IjoiVGVzdFN0dWR5IiwiZ2lmdF91cmwiOiJodHRwczpcL1wvZXhhbXBsZS5jb21cL2dpZnQ0In19.MpWwDYabhH_U-za5_hV17RUmi6UTMQFNqot1jZJQ6IM'),
+        this.storage.set('gift_url', 'example.com/gift_url')
+
+        return of(false);
+      })
+    )
+  }
+
+  login() {
+    this.isAuthenticated.next(true);
   }
 }

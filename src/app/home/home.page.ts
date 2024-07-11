@@ -19,8 +19,8 @@ export class HomePage {
   enteredCode: string = "";
   validCode: boolean = false;
 
-  name         = this.stringGen(4);
-  study        = "DELETE_MTURKTEST_022924";
+  name         = 'TestUser2'; // this.stringGen(4);
+  study        = "TestStudy2";
   private storage: Storage | null = null;
 
   constructor(public storageService: Storage, 
@@ -37,6 +37,11 @@ export class HomePage {
   async init() {
     // Create the storage instance
     this.storage = await this.storageService.create();
+
+    // clear storage
+    await this.storage.clear();
+
+    this.storage.set('parent_consent', 0);
     await this.registerUser();
   }
 
@@ -49,49 +54,25 @@ export class HomePage {
   async validate() {
     // password is correct
     if (this.enteredCode == this.name) {
-      console.log(await this.storage?.get("token"));
+      console.log(await this.storage?.get("jwt"));
       console.log(await this.storage?.get("gift_url"));
 
-      const jwt = await this.storage?.get("token");
+      this.storage?.set('parent_consent', 1);
+      this.authService.login();
       this.router.navigate(['/consent']);
     }
 
   }
 
   async registerUser(){
-    this.authService.login({name: this.name, study: this.study}).subscribe(async response => {
-      if (!response) {
-        const alert = await this.alertCtrl.create({
-          header: "No more space :(",
-          message: "Sorry, we've run out of space in our study. Please try again later.",
-          backdropDismiss: false
-        });
-        await alert.present();
-      }
+    this.authService.register({ name: this.name, study: this.study }).subscribe(response => {
+      console.log('response: ' + response);
+      // uncomment later once more gift_urls are available
+      // if (!response) {
+      //   this.storage?.set('error', 'no gifts')
+      //   this.router.navigate(['/goodbye']);
+      // }
     }) 
-
-    // temp code until backend is connected; random jwt value
-    // this.storage?.set('jwt', `eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcxOTQxMjEyNSwiaWF0IjoxNzE5NDEyMTI1fQ.Ab6Ehz0yMboUwMysB2h0wT_DKd9xwlWUrTfyViKwnIo`)
-
-    // // Register user
-    // this.http.post('https://lorevimo.com/seqer/register.php',{
-    //   "name":     this.name,
-    //   "password": this.password,
-    //   "consent":  "na",
-    //   "study":    this.study,
-    // }, {responseType: 'text'}).subscribe( 
-    // response => {
-    //   console.log('success!!')
-    //   // Save token
-    //   this.storage?.set('jwt', JSON.parse(response).jwt);
-      
-    //   // Save username to local storage
-    //   this.storage?.set('name', this.name);
-
-    //   // // Navigate to play page
-    //   // this.router.navigate(['play']);
-
-    // });
   }
 
   //--------------------------------------------

@@ -107,8 +107,6 @@ export class PlayPage {
   // Between block information
   total_blocks: number = 2; // UPDATE TO 8!!!
   current_block  = 1;
-
-  
   
   //--------------------------------------------------------------------------
   // Dynamic functions
@@ -326,6 +324,7 @@ export class PlayPage {
         const finalAlert = await this.alertCtrl.create({
           cssClass: 'custom-alert',
           message: "Ready to begin?",
+          backdropDismiss: false,
           buttons: [
             {
               text: "Begin",

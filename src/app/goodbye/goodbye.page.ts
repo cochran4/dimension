@@ -22,7 +22,7 @@ export class GoodbyePage implements OnInit {
       this.message = '(change later?) Thank you for checking out our study!';
     }
     if (error == 'no gifts') {
-      this.title = 'Sorry! :(';
+      this.title = 'Sorry!';
       this.message = "Sorry, we're out of space in this study. Please check back later.";
     }
   }
