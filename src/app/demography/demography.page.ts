@@ -127,11 +127,10 @@ export class DemographyPage {
 
   // submits data for each stage
   submitData() {
-    // get responses for this stage
-    const responses = this.items.map(item => ({
-      question: item.name,
-      answer: item.value
-    }))
+    const responses = this.items.reduce((acc, item) => {
+      acc[item.question] = item.answer;
+      return acc;
+    }, {} as Record<string, string>);
 
     console.log(responses)
     let table_name = this.table_name
