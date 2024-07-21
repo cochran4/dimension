@@ -10,9 +10,15 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { ReactiveFormsModule } from '@angular/forms';
 import { JwtInterceptor } from './interceptors/jwt_interceptor';
 
+
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, HttpClientModule, IonicStorageModule.forRoot(), ReactiveFormsModule],
+  imports: [BrowserModule, 
+            IonicModule.forRoot(), 
+            AppRoutingModule, 
+            HttpClientModule, 
+            IonicStorageModule.forRoot(), 
+            ReactiveFormsModule],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }

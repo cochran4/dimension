@@ -1,29 +1,30 @@
-<ion-header [translucent]="true">
+<!--<ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
       Welcome
     </ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header>-->
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" color="light">
   
   <div class="content-container">
 
     <ion-card>
 
       <ion-card-header>
-        <ion-card-title>Parent Consent Verification</ion-card-title>
+        <ion-card-title>Online research study on decision-making</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        (subject to change) Thank you for participating in this study. Before beginning, we'd first like to get your parent's consent for your participation. <br>
-        Once you've confirmed your age and entered your parent's email address, a special 4-character access code will be emailed to that address. You must enter the access code to continue.
-      </ion-card-content>
+        <p>We appreciate your interest! Before you begin, please complete the following steps:</p>
+        <p>1. <strong>Verify age:</strong> Confirm you are 11-17 years old.</p>
+        <p>2. <strong>Get parent approval:</strong> Enter your parent's email. If they approve, a code will be sent to them. Use this code to proceed.</p>
+ </ion-card-content>
 
       <ion-item class="ion-text-nowrap">
-        <ion-checkbox style="--size: 24px;" slot="end" [(ngModel)]="ageConfirmed"></ion-checkbox>
-        <ion-label slot="start"><strong>Confirm your age is between 11 and 17:</strong></ion-label>
+        <ion-checkbox style="--size: 24px;" slot="start" [(ngModel)]="ageConfirmed"></ion-checkbox>
+        <ion-label slot="start">I am 11 to 17 years of age.</ion-label>
       </ion-item>
 
       <ion-item class="ion-text-nowrap">

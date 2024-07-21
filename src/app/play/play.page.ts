@@ -1,9 +1,14 @@
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { AlertController } from '@ionic/angular';
 import * as yaml from 'js-yaml';
+
+
+// Image pre-load
+import { ImagePreloaderService } from '../services/image-preloader.service';
+
 
 // Interfaces
 import { BlockTemplate } from './block.interface';
@@ -27,17 +32,55 @@ export class PlayPage {
   constructor(public storageService: Storage, 
               private router: Router, 
               private http: HttpClient,
-              private alertCtrl: AlertController) {}
+              private alertCtrl: AlertController,
+              private imagePreloader: ImagePreloaderService) {}
   //--------------------------------------------------------------------------
   // Life cycle events
   //--------------------------------------------------------------------------
 
   async ngOnInit() {
 
+    // Pre-load images
+    const imagesToPreload = [
+      "/assets/negative/HF01_AO.jpg",
+      "/assets/negative/BM08_SO.jpg",
+      "/assets/negative/BF20_SC.jpg",
+      "/assets/negative/HF09_AO.jpg",
+      "/assets/negative/AM04_SC.jpg",
+      "/assets/negative/BM16_FO.jpg",
+      "/assets/negative/AM10_AO.jpg",
+      "/assets/negative/BF09_AC.jpg",
+      "/assets/negative/BM01_FC.jpg",
+      "/assets/negative/BF14_SO.jpg",
+      "/assets/negative/BF16_AO.jpg",
+      "/assets/negative/BM03_AC.jpg",
+      "/assets/negative/AM09_SC.jpg",
+      "/assets/negative/BM08_SC.jpg",
+      "/assets/negative/AF03_FO.jpg",
+      "/assets/negative/HF04_AO.jpg",
+      "/assets/negative/BM05_SO.jpg",
+      "/assets/negative/BF18_FO.jpg",
+      "/assets/negative/HF08_FO.jpg",
+      "/assets/negative/BF03_FC.jpg",
+      "/assets/negative/BF15_SC.jpg",
+      "/assets/negative/AF03_AC.jpg",
+      "/assets/negative/BM16_AC.jpg",
+      "/assets/negative/AF08_AO.jpg",
+      "/assets/negative/BF02_SC.jpg",
+      "/assets/negative/AM08_SO.jpg",
+      "/assets/negative/BF20_FO.jpg",
+      "/assets/negative/AF10_AC.jpg",
+      "/assets/negative/HF02_FC.jpg",
+      "/assets/negative/HF7_SO.jpg"
+    ];
+    this.imagePreloader.preloadImages(imagesToPreload);
+
     // Load data
     await this.initStorage();
     this.loadJWT();
     this.loadUserName();
+    this.current_block = 1;
+    this.choices_left  = 0;
     this.loadBlockTemplate(this.current_block); // Load the first block template
   
     // Initialize colors
@@ -68,7 +111,8 @@ export class PlayPage {
   game = {
     number_actions: 3,
     number_states: 1,
-    number_trials: 1,
+    trial_start_number: 1,
+    trial_end_number:   1, 
     state_transition: (current_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
     reward_transition: (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
     image_transition: (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => 0,
@@ -82,17 +126,17 @@ export class PlayPage {
   
   // Current state of agent
   pts = 0;
-  image_id = 0;
+  images = 0;
   start_time = 0;
   end_time = 0;
-  choices_left = 40;
+  choices_left = 0;
   current_state = 0;
   next_state = 0;
   current_reward = 0;
   current_image = 0;
   current_image_dummy = 0;
-  targetPoints = 0;
-
+  target_pts = 0;
+  current_image_url = '';
 
   // Agent information for storage
   agent  = {
@@ -101,11 +145,11 @@ export class PlayPage {
     threats        : new Array(),
     actions        : new Array(),
     reaction_times : new Array(),
-    states         : [1],
+    states         : new Array(),
   };
 
   // Between block information
-  total_blocks: number = 2; // UPDATE TO 8!!!
+  total_blocks: number = 1; //UPDATE: 12;
   current_block  = 1;
   
   //--------------------------------------------------------------------------
@@ -151,7 +195,7 @@ export class PlayPage {
           // Introduce a pause using setTimeout
           setTimeout(() => {
             this.executeAction(svgPoint, A, B, C);
-          }, 2000); // Pause for 2000 milliseconds (2 seconds)
+          }, 1000); // Pause for 1000 milliseconds (1 second)
 
         }
     
@@ -164,11 +208,14 @@ export class PlayPage {
      // Stop clock and store reaction time
      this.end_time = performance.now();
      this.agent.reaction_times.push(parseFloat((this.end_time - this.start_time).toFixed(3)));
+
+     // Update negative image
+     //this.updateImageRandomly();
      
     // Generate barycentric coordinates
     var lambda: [number, number, number] = this.barycentricCoordinates(svgPoint, A, B, C);
 
-    // Use the shuffled states, ensuring the result is still a tuple of length 3
+    // Use the shuffled actions, ensuring the result is still a tuple of length 3
     lambda = [
       parseFloat(lambda[this.game.shuffle_actions[0]].toFixed(3)),
       parseFloat(lambda[this.game.shuffle_actions[1]].toFixed(3)),
@@ -214,9 +261,13 @@ export class PlayPage {
 
        setTimeout(() => {
 
+        // Update image total
+        this.images = this.images + this.current_image;
+
         // Update and animate point total
-        this.targetPoints = this.pts + this.current_reward;
+        this.target_pts = this.pts + this.current_reward;
         this.animatePointIncrement();
+
 
         // Decrement choices left
         this.choices_left--;
@@ -225,7 +276,7 @@ export class PlayPage {
         this.start_time = performance.now();
 
         // Check if there are any choices left
-        if (this.choices_left){
+        if (this.choices_left >= this.game.trial_end_number){
 
           // Hide outcome
           document.getElementById('neg_image')?.classList.add('hidden');
@@ -238,23 +289,20 @@ export class PlayPage {
           document.querySelectorAll('.selected-point').forEach(el => el.remove());
 
           // Update choice in negative image
-          this.updateImageRandomly()
-
+          this.updateImageRandomly();
+ 
         } else {
 
           // Hide outcome
           document.getElementById('neg_image')?.classList.add('hidden');
 
-          // Update choice in negative image
-          this.updateImageRandomly()
-
           // Load next block
           this.loadNextBlock();
 
         }
-      }, 3000); 
+      }, 2000); 
 
-    }, 2000); 
+    }, 1000); 
 
   }
   //--------------------------------------------------------------------------
@@ -293,7 +341,8 @@ export class PlayPage {
       // Store block template in "game"
       this.game.number_actions = template.number_actions;
       this.game.number_states = template.number_states;
-      this.game.number_trials = template.number_trials;
+      this.game.trial_start_number = template.trial_start_number;
+      this.game.trial_end_number   = template.trial_end_number;
       this.game.additional_params = template.additional_params;
       this.game.state_transition  = new Function('current_state', 'action', 'params', `return (${template.state_transition})(current_state, action, params);`) as (current_state: number, action: [number, number, number], params: { [key: string]: any }) => number;
       this.game.reward_transition = new Function('current_state', 'next_state', 'action', 'params', `return (${template.reward_transition})(current_state, next_state, action, params);`) as (current_state: number, next_state: number, action: [number, number, number], params: { [key: string]: any }) => number;
@@ -301,11 +350,25 @@ export class PlayPage {
       this.game.negative_images   = template.negative_images;
       this.game.background_images = template.background_images;
       this.game.instructions = template.instructions;
-      this.game.shuffle_states  = this.shuffleArray(Array.from({ length: template.number_states }, (_, i) => i)); // Random shuffle
-      this.game.shuffle_actions = this.shuffleArray(Array.from({ length: template.number_actions }, (_, i) => i)); // Random shuffle
 
-      // Set choices left to number of trials
-      this.choices_left = template.number_trials;
+      // Check if we reset block
+      if (this.choices_left == 0){
+
+        // Shuffle states and actions
+        this.game.shuffle_states  = this.shuffleArray(Array.from({ length: template.number_states }, (_, i) => i)); // Random shuffle
+        this.game.shuffle_actions = this.shuffleArray(Array.from({ length: template.number_actions }, (_, i) => i)); // Random shuffle
+
+        // Set choices left to trial start number
+        this.choices_left = template.trial_start_number;
+
+        // Update current state of the game
+        this.pts = 0;
+        this.images = 0;
+        this.target_pts = 0;
+        this.current_state = 0;
+        this.agent.states.push(this.current_state);
+
+      }
 
       // Load instructions
       this.loadInstructions();
@@ -323,15 +386,14 @@ export class PlayPage {
         // Show the final alert with the "Begin" button
         const finalAlert = await this.alertCtrl.create({
           cssClass: 'custom-alert',
-          message: "Ready to begin?",
+          message: "Ready?",
           backdropDismiss: false,
           buttons: [
             {
-              text: "Begin",
+              text: "Yes",
               role: 'confirm',
               handler: () => {
                 this.start_time = performance.now();
-                console.log("Timer started at ", this.start_time);
               }
             }
           ]
@@ -355,10 +417,18 @@ export class PlayPage {
         await alert.dismiss();
         currentInstructionIndex++;
         await showNextInstruction();
-      }, 5000); // Transition time in milliseconds (5 seconds)
+      }, 4000); // Transition time in milliseconds (4 seconds)
     };
   
     await showNextInstruction();  
+
+    // Reveal triangle and instructions again
+    document.getElementById('action_triangle')?.classList.remove('hidden');
+    document.getElementById('instructions')?.classList.remove('hidden');
+
+    // Remove the "X" text element
+    document.querySelectorAll('.selected-point').forEach(el => el.remove());
+    
   }
 
   // Load and parse the YAML file
@@ -372,30 +442,9 @@ export class PlayPage {
   
     if (this.current_block <= this.total_blocks) {
 
-      // Reveal triangle and instructions again
-      document.getElementById('action_triangle')?.classList.remove('hidden');
-      document.getElementById('instructions')?.classList.remove('hidden');
-
-      // Remove the "X" text element
-      document.querySelectorAll('.selected-point').forEach(el => el.remove());
-
       // Update choice in negative image
       this.updateImageRandomly()
-      
-      // Reset current state
-      this.pts = 0;
-      this.image_id = 0;
-      this.start_time = 0;
-      this.end_time = 0;
-      this.choices_left = 40;
-      this.current_state = 0;
-      this.next_state = 0;
-      this.current_reward = 0;
-      this.current_image = 0;
-      this.current_image_dummy = 0;
-      this.targetPoints = 0;
-
-
+ 
       // Reset agent information
       this.agent  = {
         rewards        : new Array(),
@@ -403,11 +452,12 @@ export class PlayPage {
         threats        : new Array(),
         actions        : new Array(),
         reaction_times : new Array(),
-        states         : [1],
+        states         : new Array(),
       };
 
-      // Load the block template
+      // Load next block template
       this.loadBlockTemplate(this.current_block);
+
   
     } else {
       // All blocks completed
@@ -421,15 +471,14 @@ export class PlayPage {
   // Helper functions
   //--------------------------------------------------------------------------
 
-
   // Update image randomly
   updateImageRandomly() {
-    const randomIndex = Math.floor(Math.random() * this.game.negative_images.length);
-    this.current_image_dummy = randomIndex;
+      const randomIndex = Math.floor(Math.random() * this.game.negative_images.length);
+      this.current_image_dummy = randomIndex;
+      setTimeout( () => {
+      this.current_image_url   = this.game.negative_images[this.current_image_dummy];
+      }, 500);
   }
-
-
-  testing_jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcxOTY3NjkzMiwiZXhwIjoxNzIxNDkxMzMyLCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlciIsInN0dWR5IjoiVGVzdFN0dWR5IiwiZ2lmdF91cmwiOiJodHRwczpcL1wvZXhhbXBsZS5jb21cL2dpZnQ0In19.MpWwDYabhH_U-za5_hV17RUmi6UTMQFNqot1jZJQ6IM";
 
   private sendData(): void {
     // Prepare data to send
@@ -440,7 +489,7 @@ export class PlayPage {
     };
   
     const postData = {
-      jwt: this.testing_jwt, // UPDATE TO this.jwt!!!!
+      jwt: this.jwt, 
       name: this.name,
       table_name: "games",
       data: data,
@@ -504,7 +553,7 @@ private shuffleArray<T>(array: T[]): T[] {
 
 // Animates the point increment
 private animatePointIncrement() {
-  if (this.pts < this.targetPoints) {
+  if (this.pts < this.target_pts) {
     // Increment points one by one
     this.pts++;
     // Use requestAnimationFrame for smooth animation
