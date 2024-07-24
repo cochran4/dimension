@@ -18,12 +18,12 @@ export class GoodbyePage implements OnInit {
     
     const error = await this.storage.get('error');
     if (error == 'no consent') {
-      this.title = 'Thank you!';
-      this.message = '(change later?) Thank you for checking out our study!';
+      this.title = 'Consent not provided';
+      this.message = 'We are grateful for your interest in our study. However, without your consent, participation is not possible.'; 
     }
     if (error == 'no gifts') {
-      this.title = 'Sorry!';
-      this.message = "Sorry, we're out of space in this study. Please check back later.";
+      this.title = 'Study currently full';
+      this.message = "We're sorry, but we cannot accept more participants at this time. Please check back later.";
     }
   }
 

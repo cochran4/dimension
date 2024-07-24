@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule , CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -10,15 +10,14 @@ import { PlayPage } from './play.page';
 
 //import { IonicImageLoaderModule } from 'ionic-image-loader-v7';
 
-
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    PlayPageRoutingModule,
+    PlayPageRoutingModule
     //IonicImageLoaderModule
   ],
-  declarations: [PlayPage]
+  declarations: [PlayPage],
 })
 export class PlayPageModule {}

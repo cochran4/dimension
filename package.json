@@ -31,6 +31,7 @@
     "@ionic/angular": "^7.0.0",
     "@ionic/storage": "^4.0.0",
     "@ionic/storage-angular": "^4.0.0",
+    "ionic-image-loader": "^6.3.3",
     "ionicons": "^7.0.0",
     "js-yaml": "^4.1.0",
     "rxjs": "~7.8.0",

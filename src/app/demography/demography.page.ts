@@ -98,7 +98,7 @@ export class DemographyPage {
     // If not all questions are answered, show an alert with options to continue or cancel
     if (!isComplete) {
       const alert = await this.alertCtrl.create({
-        header: 'Incomplete Survey',
+        header: 'Survey incomplete',
         message: 'Some questions are unanswered. Do you still want to continue?',
         buttons: [
           {

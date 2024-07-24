@@ -29,9 +29,9 @@ export class ConsentPage {
       this.router.navigate(['/demography']); // Navigate to the Demography page
     } else {
       const alert = await this.alertCtrl.create({
-        header: 'Warning!',
-        subHeader: 'You did not check the box indicating your agreement to participation.',
-        message: 'If this is not what you meant to do, please click "Cancel" and check the box before submitting again. Otherwise, please click "Continue" to skip to the end.',
+        header: 'Notice',
+        subHeader: 'The participation agreement box is not checked.',
+        message: 'If you intended to agree, please click "Cancel" and check the box before submitting again. Otherwise, click "Continue" to proceed to the end',
         buttons: [
           {
             text: 'Cancel',

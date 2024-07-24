@@ -1,11 +1,14 @@
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" color="light">
 
   <div class="content-container">
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{title}}</ion-card-title>
       </ion-card-header>
-      <ion-card-content>{{message}}</ion-card-content>
+      <ion-card-content>
+        <h2 style="margin-bottom: 20px;">{{message}}</h2>
+        <h3> For questions, please email us at <a href="mailto:seqer@math.wisc.edu">seqer&#64;math.wisc.edu</a>.</h3>      
+      </ion-card-content>
     </ion-card>
   </div>
   

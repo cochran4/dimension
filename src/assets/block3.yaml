@@ -65,12 +65,11 @@ additional_params:
   reward_max: 10
   num_images: 30
 instructions:
-  - "Game #1."
-  - "Let's go over the rules."
-  - "Click the triangle to choose a number (1, 2, or 3). You can also click between the numbers."
-  - "You will gain points and may see a sad, angry, or scared face."
+  - "Game #2."
+  - "Same rules as before."
+  - "Click the triangle to choose an action (1, 2, 3, or between)."
   - "Your choice changes your points and how often you see a negative face."
   - "Try to get the most points and see the fewest negative faces."
-
+  
 
 

@@ -8,6 +8,11 @@
        </ion-col>
        <ion-col>
         <ion-label color="light">
+          {{"Negative faces: " + images.toString()}} 
+        </ion-label>
+      </ion-col>
+       <ion-col>
+        <ion-label color="light">
           {{"Choices left: " + choices_left.toString()}} 
         </ion-label>
       </ion-col>
@@ -18,7 +23,7 @@
 <ion-content color="dark" scrollY="false">
   <ion-fab vertical="top" horizontal="center" slot="fixed" style="padding: 20px;" id="instructions" class="transition-element">
   <ion-label color="light">
-    Click the triangle to choose an action (1, 2, 3, or between) to set your chances for points and negative images.  </ion-label>
+    Click the triangle to choose an action (1, 2, 3, or between) to set your chances for points and negative faces.  </ion-label>
   </ion-fab>
 
   <ion-content color="dark" scrollY="false">
@@ -27,8 +32,11 @@
        <ion-label color="light"><h1 style="font-size:32px"> {{"+ " + this.current_reward.toString()}} </h1></ion-label>
     </ion-fab-button>
   </ion-fab>
-  <div style="align-items: center; justify-content: center;" id="neg_image" class="transition-element hidden">
-    <ion-img src={{game.negative_images[current_image_dummy]}}></ion-img>
+  <div style="display: flex; height: 100vh; align-items: center; justify-content: center;" id="neg_image" class="transition-element hidden">
+    <!--<ion-img src={{game.negative_images[current_image_dummy]}}></ion-img>-->
+    <ion-img [src]="current_image_url"></ion-img>
+    <!--<ion-img  [appLazyLoad] ="game.negative_images[current_image_dummy]"></ion-img>-->
+    <!--<img *ngIf="game.negative_images[current_image_dummy]" [ngSrc]="game.negative_images[current_image_dummy]" width="300" height="300" alt="Negative Image" priority>-->
   </div>
   </ion-content>
 
