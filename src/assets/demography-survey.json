@@ -2,23 +2,27 @@
   "questions": [
     {
       "name": "What is your age in years?",
-      "value": -1,
-      "values": ["11-14", "15-17"]
+      "value": "-1",
+      "values": ["11-14", "15-17"],
+      "label": "age"
     },
     {
       "name": "How do you currently describe your gender identity?",
-      "value": -1,
-      "values": ["Female", "Male", "Other"]
+      "value": "-1",
+      "values": ["Female", "Male", "Other"],
+      "label": "gender"
     },
     {
       "name": "What is your race?",
-      "value": -1,
-      "values": ["American Indian/Alaska Native", "Asian", "Native Hawaiian or Other Pacific Islander", "Black or African American", "White", "More than One Race", "Unknown", "Other"]
+      "value": "-1",
+      "values": ["American Indian/Alaska Native", "Asian", "Native Hawaiian or Other Pacific Islander", "Black or African American", "White", "More than One Race", "Unknown", "Other"],
+      "label": "race"
     },
     {
       "name": "What is your ethnicity?",
-      "value": -1,
-      "values": ["Hispanic", "Not Hispanic"]
+      "value": "-1",
+      "values": ["Hispanic", "Not Hispanic"],
+      "label": "ethnicity"
     }
   ],
   

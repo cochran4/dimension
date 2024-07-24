@@ -2,53 +2,63 @@
     "questions": [
       {
         "name": "mad",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "mad"
       },
       {
         "name": "joyful",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "joyful"
       },
       {
         "name": "sad",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "sad"
       },
       {
         "name": "proud",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "proud"
       },
       {
         "name": "cheerful",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "cheerful"
       },
       {
         "name": "scared",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "scared"
       },
       {
         "name": "happy",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "happy"
       },
       {
         "name": "afraid",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "afraid"
       },
       {
         "name": "lively",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "lively"
       },
       {
         "name": "miserable",
-        "value": -1,
-        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"]
+        "value": "-1",
+        "values": ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        "label": "miserable"
       }
     ],
 

@@ -128,7 +128,7 @@ export class DemographyPage {
   // submits data for each stage
   submitData() {
     const responses = this.items.reduce((acc, item) => {
-      acc[item.question] = item.answer;
+      acc[item.label] = item.value;
       return acc;
     }, {} as Record<string, string>);
 

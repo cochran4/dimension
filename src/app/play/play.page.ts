@@ -44,10 +44,11 @@ export class PlayPage {
     this.primaryColor = this.convertToRgba(getComputedStyle(document.documentElement).getPropertyValue('--ion-color-primary'), 0.4);
     this.primaryShadeColor = this.convertToRgba(getComputedStyle(document.documentElement).getPropertyValue('--ion-color-primary-shade'), 0.4);
   
-
     // Update choice in negative image
-    this.updateImageRandomly()
-
+    setTimeout(() => {
+      this.updateImageRandomly()
+    }, 2000)
+    
   }
   
 
@@ -237,16 +238,21 @@ export class PlayPage {
           // Remove the "X" text element
           document.querySelectorAll('.selected-point').forEach(el => el.remove());
 
-          // Update choice in negative image
-          this.updateImageRandomly()
+          setTimeout(() => {
+            // Update choice in negative image
+            this.updateImageRandomly()
+          }, 1500);
 
         } else {
 
           // Hide outcome
           document.getElementById('neg_image')?.classList.add('hidden');
 
-          // Update choice in negative image
-          this.updateImageRandomly()
+          setTimeout(() => {
+            // Update choice in negative image
+            this.updateImageRandomly()
+            console.log("changed")
+          }, 10000);
 
           // Load next block
           this.loadNextBlock();
@@ -254,7 +260,7 @@ export class PlayPage {
         }
       }, 3000); 
 
-    }, 2000); 
+    }, 500); 
 
   }
   //--------------------------------------------------------------------------
@@ -380,7 +386,10 @@ export class PlayPage {
       document.querySelectorAll('.selected-point').forEach(el => el.remove());
 
       // Update choice in negative image
-      this.updateImageRandomly()
+      setTimeout(() => {
+        this.updateImageRandomly();
+      }, 10000);
+      
       
       // Reset current state
       this.pts = 0;
@@ -429,7 +438,7 @@ export class PlayPage {
   }
 
 
-  testing_jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcxOTY3NjkzMiwiZXhwIjoxNzIxNDkxMzMyLCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlciIsInN0dWR5IjoiVGVzdFN0dWR5IiwiZ2lmdF91cmwiOiJodHRwczpcL1wvZXhhbXBsZS5jb21cL2dpZnQ0In19.MpWwDYabhH_U-za5_hV17RUmi6UTMQFNqot1jZJQ6IM";
+  //testing_jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcxOTY3NjkzMiwiZXhwIjoxNzIxNDkxMzMyLCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlciIsInN0dWR5IjoiVGVzdFN0dWR5IiwiZ2lmdF91cmwiOiJodHRwczpcL1wvZXhhbXBsZS5jb21cL2dpZnQ0In19.MpWwDYabhH_U-za5_hV17RUmi6UTMQFNqot1jZJQ6IM";
 
   private sendData(): void {
     // Prepare data to send
@@ -440,7 +449,7 @@ export class PlayPage {
     };
   
     const postData = {
-      jwt: this.testing_jwt, // UPDATE TO this.jwt!!!!
+      jwt: this.jwt, // UPDATE TO this.jwt!!!!
       name: this.name,
       table_name: "games",
       data: data,

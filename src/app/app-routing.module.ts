@@ -27,7 +27,7 @@ const routes: Routes = [
   {
     path: 'play',
     loadChildren: () => import('./play/play.module').then( m => m.PlayPageModule),
-    canActivate: [ConsentGuard]
+    //canActivate: [ConsentGuard]
   },
   {
     path: 'thank-you',
