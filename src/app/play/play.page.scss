@@ -52,3 +52,8 @@ ion-fab-button {
   opacity: 0; /* Fully transparent when hidden */
   pointer-events: none; /* Prevents click events on hidden elements */
 }
+
+svg {
+  width: 90vw; /* 90% of the viewport width */
+  height: 90vh; /* 90% of the viewport height */
+}

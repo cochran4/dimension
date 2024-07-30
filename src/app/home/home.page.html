@@ -1,11 +1,3 @@
-<!--<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Welcome
-    </ion-title>
-  </ion-toolbar>
-</ion-header>-->
-
 <ion-content [fullscreen]="true" color="light">
   
   <div class="content-container">
@@ -20,25 +12,26 @@
         <p>We appreciate your interest! Before you begin, please complete the following steps:</p>
         <p>1. <strong>Verify age:</strong> Confirm you are 11-17 years old.</p>
         <p>2. <strong>Get parent approval:</strong> Enter your parent's email. If they approve, a code will be sent to them. Use this code to proceed.</p>
- </ion-card-content>
+      </ion-card-content>
 
-      <ion-item class="ion-text-nowrap">
-        <ion-checkbox style="--size: 24px;" slot="start" [(ngModel)]="ageConfirmed"></ion-checkbox>
-        <ion-label slot="start">I am 11 to 17 years of age.</ion-label>
+      <ion-item>
+        <ion-checkbox slot="start" [(ngModel)]="ageConfirmed"></ion-checkbox>
+        <ion-label style="flex: 1">I am 11 to 17 years of age.</ion-label>
       </ion-item>
 
-      <ion-item class="ion-text-nowrap">
-        <ion-label><strong>Enter parent's email:</strong></ion-label>
-        <ion-input type="email" [(ngModel)]="email"></ion-input>
-        <ion-button slot="end" style="font-size: 16px" (click)="sendEmail()" [disabled]="sent || !ageConfirmed || !email">Send code</ion-button>
-      </ion-item>
+      <ion-row>
+        <ion-col size="3"><ion-label><strong>Enter parent's email:</strong></ion-label></ion-col>
+        <ion-col size="9"><ion-input type="email" [(ngModel)]="email"></ion-input></ion-col>
+      </ion-row>
 
-      <ion-item class="ion-text-nowrap">
-        <ion-label><strong>Enter code:</strong></ion-label>
-        <ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode"></ion-input>
-      </ion-item>
+      <ion-button (click)="sendEmail()" [disabled]="!ageConfirmed || !email">Send code</ion-button>
 
-      <ion-button (click)="validate()">Continue</ion-button>
+      <ion-row>
+        <ion-col size="2"><ion-label><strong>Enter code:</strong></ion-label></ion-col>
+        <ion-col size="10"><ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode"></ion-input></ion-col>
+      </ion-row>
+
+      <ion-button (click)="validate()" [disabled]="!sent">Continue</ion-button>
 
     </ion-card>
 

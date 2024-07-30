@@ -93,7 +93,7 @@ export class DemographyPage {
   }
 
   async submit() {
-    const isComplete = this.items.every(item => item.value !== -1);
+    const isComplete = this.items.every(item => item.value !== "-1");
 
     // If not all questions are answered, show an alert with options to continue or cancel
     if (!isComplete) {
