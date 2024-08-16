@@ -45,13 +45,13 @@ export class HomePage {
     await this.registerUser();
   }
 
-  sendEmail() {
-    const jwt = this.storage?.get('jwt');
+  async sendEmail() {
+    const jwt = await this.storage?.get('jwt');
     const info = {
       email: this.email,
       name: this.name,
-      jwt: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb3Jldmltby5jb20iLCJhdWQiOiJodHRwOlwvXC9zZXFlcjIud2ViLmFwcCIsImlhdCI6MTcyMTk1MzUzOSwiZXhwIjoxNzIzNzY3OTM5LCJkYXRhIjp7Im5hbWUiOiJUZXN0VXNlcjQiLCJzdHVkeSI6IlRlc3RTdHVkeTQiLCJnaWZ0X3VybCI6Imh0dHBzOlwvXC9leGFtcGxlLmNvbVwvZ2lmdDEtMTUifX0.2qXMd5-FLatmV5T_hjaDWlv-mScop0fxxtwLuSCwt1g"
-    } // change above to the variable jwt later
+      jwt: jwt
+    }
 
     this.http.post('https://www.lorevimo.com/dimension/send_email.php', info, {responseType: 'text'}).subscribe({
       next: (response) => {
@@ -80,10 +80,10 @@ export class HomePage {
     this.authService.register({ name: this.name, study: this.study }).subscribe(response => {
       console.log('response: ' + response);
       // no more gift urls
-      // if (!response) {
-      //   this.storage?.set('error', 'no gifts')
-      //   this.router.navigate(['/goodbye']);
-      // }
+      if (!response) {
+        this.storage?.set('error', 'no gifts')
+        this.router.navigate(['/goodbye']);
+      }
     }) 
   }
 
