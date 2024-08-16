@@ -19,8 +19,8 @@ export class HomePage {
   enteredCode: string = "";
   validCode: boolean = false;
 
-  name         = 'TestUser2'; // this.stringGen(4);
-  study        = "TestStudy2";
+  name         = this.stringGen(6);
+  study        = 'dimension-alpha';
   private storage: Storage | null = null;
 
   constructor(public storageService: Storage, 
@@ -47,6 +47,7 @@ export class HomePage {
 
   async sendEmail() {
     const jwt = await this.storage?.get('jwt');
+    console.log('username: ' + this.name)
     const info = {
       email: this.email,
       name: this.name,
