@@ -1,7 +1,7 @@
 number_actions: 3
 number_states:  1
-trial_start_number:  10
-trial_end_number: 6
+trial_start_number:  20
+trial_end_number: 11
 state_transition: |
   (current_state, action, params) => {
     return 0; // Bandit case (i.e., single state)

@@ -150,7 +150,7 @@ export class PlayPage {
   };
 
   // Between block information
-  total_blocks: number = 1; //UPDATE: 12;
+  total_blocks: number = 8; //UPDATE: 12;
   current_block  = 1;
   
   //--------------------------------------------------------------------------

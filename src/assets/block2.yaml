@@ -1,6 +1,6 @@
 number_actions: 3
 number_states:  1
-trial_start_number:  5
+trial_start_number:  11
 trial_end_number: 1
 state_transition: |
   (current_state, action, params) => {
