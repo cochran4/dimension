@@ -209,9 +209,6 @@ export class PlayPage {
      // Stop clock and store reaction time
      this.end_time = performance.now();
      this.agent.reaction_times.push(parseFloat((this.end_time - this.start_time).toFixed(3)));
-
-     // Update negative image
-     //this.updateImageRandomly();
      
     // Generate barycentric coordinates
     var lambda: [number, number, number] = this.barycentricCoordinates(svgPoint, A, B, C);
@@ -335,7 +332,7 @@ export class PlayPage {
 
   // Load and parse the YAML file
   private loadBlockTemplate(blockNumber: number) {
-    this.http.get(`/assets/block${blockNumber}.yaml`, { responseType: 'text' }).subscribe(yamlText => {
+    this.http.get(`/assets/research_design/block${blockNumber}.yaml`, { responseType: 'text' }).subscribe(yamlText => {
       // Block template
       const template = yaml.load(yamlText) as unknown as BlockTemplate;
 
@@ -378,20 +375,29 @@ export class PlayPage {
 
   }
 
-  // Load instructions for given block
+ // Load instructions for given block
   async loadInstructions() {
     let currentInstructionIndex = 0;
-  
-    const showNextInstruction = async () => {
+
+    const showInstruction = async () => {
+      // If we're at the final instruction, show the "Ready?" alert with a back arrow
       if (currentInstructionIndex >= this.game.instructions.length) {
-        // Show the final alert with the "Begin" button
         const finalAlert = await this.alertCtrl.create({
-          cssClass: 'custom-alert',
           message: "Ready?",
           backdropDismiss: false,
           buttons: [
             {
-              text: "Yes",
+              text: 'BACK', // Back button
+              role: 'cancel',
+              cssClass: 'arrow-button left-arrow', // Custom CSS class for positioning and styling
+              handler: async () => {
+                // Go back to the last instruction
+                currentInstructionIndex--;
+                await showInstruction();
+              }
+            },
+            {
+              text: 'YES',
               role: 'confirm',
               handler: () => {
                 this.start_time = performance.now();
@@ -399,29 +405,53 @@ export class PlayPage {
             }
           ]
         });
-  
+
         await finalAlert.present();
         return;
       }
-  
+
+      // Create an array for the buttons
+      const buttons = [];
+
+      // Add the Back arrow button if it's not the first instruction
+      if (currentInstructionIndex > 0) {
+        buttons.push({
+          text: 'BACK', // Back button
+          role: 'cancel',
+          handler: async () => {
+            // Go back to the previous instruction
+            if (currentInstructionIndex > 0) {
+              currentInstructionIndex--;
+            }
+            await showInstruction(); // Show the updated instruction
+          }
+        });
+      }
+
+      // Add the Next arrow button
+      buttons.push({
+        text: 'NEXT', // Forward button
+        role: 'confirm',
+        handler: async () => {
+          // Go to the next instruction
+          currentInstructionIndex++;
+          await showInstruction(); // Show the updated instruction
+        }
+      });
+
       // Show the current instruction
       const alert = await this.alertCtrl.create({
         cssClass: 'custom-alert',
         message: this.game.instructions[currentInstructionIndex],
+        //message: `<img src="/assets/negative/HF01_AO.jpg">`,
         backdropDismiss: false,
+        buttons: buttons
       });
-  
+
       await alert.present();
-  
-      // Dismiss the alert and show the next instruction after 3 seconds
-      setTimeout(async () => {
-        await alert.dismiss();
-        currentInstructionIndex++;
-        await showNextInstruction();
-      }, 4000); // Transition time in milliseconds (4 seconds)
     };
-  
-    await showNextInstruction();  
+
+    await showInstruction();  
 
     // Reveal triangle and instructions again
     document.getElementById('action_triangle')?.classList.remove('hidden');
@@ -429,8 +459,9 @@ export class PlayPage {
 
     // Remove the "X" text element
     document.querySelectorAll('.selected-point').forEach(el => el.remove());
-    
   }
+
+
 
   // Load and parse the YAML file
   loadNextBlock() {

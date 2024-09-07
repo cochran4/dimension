@@ -67,10 +67,11 @@ additional_params:
 instructions:
   - "Game #1."
   - "Let's go over the rules."
-  - "Click the triangle to choose a number (1, 2, or 3). You can also click between the numbers."
-  - "You will gain points and may see a sad, angry, or scared face."
-  - "Your choice changes your points and how often you see a negative face."
-  - "Try to get the most points and see the fewest negative faces."
+  - 'Click the triangle to choose a number (1, 2, or 3). <br/> <img src="/assets/instructions/screenshot_1.png">'
+  - 'You can also click between the numbers. <br/> <img src="/assets/instructions/screenshot_2.png">'
+  - 'You will gain points and may see a sad, angry, or scared face. <br/> <img src="/assets/instructions/screenshot_3.png">'
+  - 'Your choice changes your points and how often you see a negative face. <br/> <img src="/assets/instructions/screenshot_4.png">'
+  - 'For this game, your goal is to get the most points and see the fewest negative faces. <br/> <img src="/assets/instructions/screenshot_5.png">'
 
 
 
