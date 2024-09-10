@@ -152,6 +152,8 @@ export class PlayPage {
   // Between block information
   total_blocks: number = 8; //UPDATE: 12;
   current_block  = 1;
+  total_games = 8;
+  game_number = 1;
   
   //--------------------------------------------------------------------------
   // Dynamic functions
@@ -348,9 +350,10 @@ export class PlayPage {
       this.game.negative_images   = template.negative_images;
       this.game.background_images = template.background_images;
       this.game.instructions = template.instructions;
-
+      
       // Check if we reset block
       if (this.choices_left == 0){
+        this.game_number = parseInt(template.instructions[0].slice(-2, -1));
 
         // Shuffle states and actions
         this.game.shuffle_states  = this.shuffleArray(Array.from({ length: template.number_states }, (_, i) => i)); // Random shuffle
@@ -389,7 +392,7 @@ export class PlayPage {
             {
               text: 'BACK', // Back button
               role: 'cancel',
-              cssClass: 'arrow-button left-arrow', // Custom CSS class for positioning and styling
+              //cssClass: 'arrow-button left-arrow', // Custom CSS class for positioning and styling
               handler: async () => {
                 // Go back to the last instruction
                 currentInstructionIndex--;
@@ -403,7 +406,8 @@ export class PlayPage {
                 this.start_time = performance.now();
               }
             }
-          ]
+          ],
+          cssClass: 'custom-alert'
         });
 
         await finalAlert.present();
