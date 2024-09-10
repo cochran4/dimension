@@ -38,3 +38,12 @@ ion-input {
   text-align: left;
   font-size: medium;
 }
+
+em {
+  color: firebrick;
+}
+
+.input_field {
+  background-color: var(--ion-color-light, black);
+  --padding-start: 1%; /* Adjust the padding as needed */
+}

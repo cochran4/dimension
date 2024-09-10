@@ -13,7 +13,7 @@
         <p>1. <strong>Verify age:</strong> Confirm you are 11-17 years old.</p>
         <p>2. <strong>Get parent approval:</strong> Enter your parent's email. If they approve, a code will be sent to them. Use this code to proceed.
           <br>
-          <i>Note: Please ask your parent to check their junk/spam folder for the email. If the email is there, they may need to move it to the inbox before the Agree button works.</i>
+          <em><strong>Note: </strong>Please ask your parent to check their junk/spam folder for the email. If the email is there, they may need to move it to the inbox before the Agree button works.</em>
         </p>
       </ion-card-content>
 
@@ -24,14 +24,14 @@
 
       <ion-row>
         <ion-col size="3"><ion-label><strong>Enter parent's email:</strong></ion-label></ion-col>
-        <ion-col size="9"><ion-input type="email" [(ngModel)]="email"></ion-input></ion-col>
+        <ion-col size="9"><ion-input type="email" [(ngModel)]="email" class="input_field" placeholder="abc123@example.com"></ion-input></ion-col>
       </ion-row>
 
       <ion-button (click)="sendEmail()" [disabled]="!ageConfirmed || !email">Send code</ion-button>
 
       <ion-row>
-        <ion-col size="2"><ion-label><strong>Enter code:</strong></ion-label></ion-col>
-        <ion-col size="10"><ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode"></ion-input></ion-col>
+        <ion-col size="3"><ion-label><strong>Enter code:</strong></ion-label></ion-col>
+        <ion-col size="9"><ion-input class="ion-invalid ion-touched" type="text" [(ngModel)]="enteredCode" class="input_field" placeholder="Code"></ion-input></ion-col>
       </ion-row>
 
       <ion-button (click)="validate()" [disabled]="!sent">Continue</ion-button>
