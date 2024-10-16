@@ -20,7 +20,7 @@ export class HomePage {
   validCode: boolean = false;
 
   name         = this.stringGen(6);
-  study        = 'dimension-alpha';
+  study        = 'dimension-pilot';
   private storage: Storage | null = null;
 
   constructor(public storageService: Storage, 
@@ -47,7 +47,6 @@ export class HomePage {
 
   async sendEmail() {
     const jwt = await this.storage?.get('jwt');
-    console.log('username: ' + this.name)
     const info = {
       email: this.email,
       name: this.name,
@@ -67,9 +66,6 @@ export class HomePage {
   async validate() {
     // password is correct
     if (this.enteredCode == this.name) {
-      console.log(await this.storage?.get("jwt"));
-      console.log(await this.storage?.get("gift_url"));
-
       this.storage?.set('parent_consent', 1);
       this.authService.login();
       this.router.navigate(['/consent']);
@@ -79,7 +75,6 @@ export class HomePage {
 
   async registerUser(){
     this.authService.register({ name: this.name, study: this.study }).subscribe(response => {
-      console.log('response: ' + response);
       // no more gift urls
       if (!response) {
         this.storage?.set('error', 'no gifts')

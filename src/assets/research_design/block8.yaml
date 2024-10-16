@@ -64,8 +64,9 @@ additional_params:
   image_success:  [0.2, 0.4, 0.8]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 4 of 8: Gain points and avoid negative faces.'
 instructions:
-  - "You may now gain points in addition to seeing a negative face."
-  - "Try to get the most points and see the fewest negative faces."
+  - "For you remaining choices, you may gain points in addition to seeing negative faces."
+  - "Try to gain points and avoid negative faces."
 
 

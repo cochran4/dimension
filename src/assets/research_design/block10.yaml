@@ -64,12 +64,11 @@ additional_params:
   image_success:  [0.1, 0.3, 0.7]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 6 of 8: Gain points and avoid negative faces.'
 instructions:
-  - "Game #6."
-  - "This game has the same rules as Game #1."
-  - "Click the triangle to choose an action (1, 2, 3, or between)."
-  - "Your choice changes your points and how often you see a negative face."
-  - "Try to get the most points and see the fewest negative faces."
+  - "Game 6 of 8."
+  - "You goal is to gain points and avoid negative faces."
+
   
 
 

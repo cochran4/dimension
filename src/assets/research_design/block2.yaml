@@ -64,9 +64,10 @@ additional_params:
   image_success:  [0, 0, 0]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 1 of 8: Gain points (you will no longer see any negative faces).'
 instructions:
-  - "You will no longer see a negative face for your remaining choices."
-  - "Try to get the most points."
+  - "For your remaining choices, you will no longer see negative faces."
+  - "Try to gain points."
 
 
 

@@ -29,7 +29,6 @@ export class AuthenticationService {
   async loadJWT() {
     const jwt = await this.storage.get("jwt");
     if (jwt) {
-      console.log('jwt found: ', jwt);
       this.jwt = jwt;
       this.isAuthenticated.next(true);
     } else {
@@ -47,12 +46,8 @@ export class AuthenticationService {
     return this.http.post('https://www.lorevimo.com/dimension/add_user.php', info, {responseType: 'text'}).pipe(
       switchMap(response => {
         const res = JSON.parse(response);
-        console.log(res);
         this.jwt = res.jwt;
         this.gift_url = res.gift_url
-
-        console.log('received jwt: ' + this.jwt);
-        console.log('received gift_url ' + this.gift_url);
 
         if (this.gift_url != '') {
           return from(Promise.all([

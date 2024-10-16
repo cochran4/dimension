@@ -64,12 +64,10 @@ additional_params:
   image_success:  [0, 0, 0]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 3 of 8: Gain points (you will not see any negative faces).'
 instructions:
-  - "Game #3."
-  - "This game has new rules."
-  - "Click the triangle to choose an action (1, 2, 3, or between)."
-  - "You will only gain points."
-  - "Your choice changes your points."
-  - "Try to get the most points."
+  - "Game 3 of 8."
+  - "In this game, you will not see any negative faces."
+  - "Your goal is to gain points."
 
 

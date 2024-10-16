@@ -1,9 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
      <ion-row class="ion-text-center">
-        <ion-col>
-          <ion-label>{{"Game " + game_number + " of " + total_games}}</ion-label>
-        </ion-col>
        <ion-col id="pointCounter">
          <ion-label>{{"Points: " + pts.toString()}} </ion-label>
        </ion-col>
@@ -19,8 +16,12 @@
 
 <ion-content scrollY="false">
   <ion-fab vertical="top" horizontal="center" slot="fixed" style="padding: 20px;" id="instructions" class="transition-element">
-  <ion-label>
-    Click the triangle to choose an action (1, 2, 3, or between) to set your chances for points and negative faces.  </ion-label>
+    <div style="text-align: center;">
+    <ion-label>
+      <strong>{{this.game.display_instructions}}</strong> <br/>
+      <i>Click the triangle to choose an action (1, 2, 3, or between) to set your chances for gaining points and avoiding negative faces.</i>
+    </ion-label>
+  </div>    
   </ion-fab>
 
   <ion-content scrollY="false">

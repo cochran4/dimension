@@ -64,8 +64,9 @@ additional_params:
   image_success:  [0.2, 0.4, 0.8]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 2 of 8: Avoid negative faces (you will no longer gain points).'
 instructions:
-  - "You will no longer gain points for your remaining choices."
-  - "Try to see the fewest negative faces."
+  - "For your remaining choices, you will no longer gain points."
+  - "Try to avoid negative faces."
 
 

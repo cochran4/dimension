@@ -9,5 +9,6 @@ export interface BlockTemplate {
   background_images: string[];
   negative_images: string[];
   additional_params: { [key: string]: any };
+  display_instructions: string[];
   instructions: string[];
 }

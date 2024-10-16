@@ -64,12 +64,10 @@ additional_params:
   image_success:  [0.2, 0.4, 0.8]
   reward_max: 10
   num_images: 30
+display_instructions: 'Game 4 of 8: Avoid negative faces (you will not gain points).'
 instructions:
-  - "Game #4."
-  - "This game has new rules."
-  - "Click the triangle to choose an action (1, 2, 3, or between)."
-  - "You may see a sad, angry, or scared face."
-  - "Your choice changes how often you see a negative face."
-  - "Try to see the fewest negative faces."
+  - "Game 4 of 8."
+  - "In this game, you will not gain points."
+  - "Your goal is to avoid negative faces."
 
 
